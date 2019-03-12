@@ -31,6 +31,15 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         src/main/cpp/ffmpeg-jni.cpp)
 
+add_library( # Sets the name of the library.
+        lib-live
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        src/main/cpp/ffmpeg-jni.cpp)
+
 # 编解码(最重要的库)
 add_library(
         avcodec
@@ -116,6 +125,50 @@ set_target_properties(
         ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libswscale-3.so)
 
 
+# x264格式编码
+add_library(
+        x264
+        SHARED
+        IMPORTED)
+set_target_properties(
+        x264
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libx264.a)
+
+# yuv格式
+add_library(
+        yuv
+        SHARED
+        IMPORTED)
+set_target_properties(
+        yuv
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libyuv.a)
+
+
+# fdk-acc格式
+add_library(
+        fdk-aac
+        SHARED
+        IMPORTED)
+set_target_properties(
+        fdk-aac
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libfdk-aac.a)
+
+
+# rtmp格式
+add_library(
+        rtmp
+        SHARED
+        IMPORTED)
+set_target_properties(
+        rtmp
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/librtmp.a)
+
+
+
 find_library( # Sets the name of the path variable.
         log-lib
 
@@ -135,6 +188,11 @@ target_link_libraries( # Specifies the target library.
         postproc
         swresample
         swscale
+
+        x264
+        yuv
+        fdk-aac
+        rtmp
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})
