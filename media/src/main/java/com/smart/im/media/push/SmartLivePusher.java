@@ -4,14 +4,27 @@ import android.content.Context;
 import android.view.SurfaceView;
 
 import com.smart.im.media.bean.LivePushConfig;
+import com.smart.im.media.bridge.LiveBridge;
 
 /**
- * @date : 2019/3/12 下午4:35
+ * @date : 2019/3/12 下午4:03
  * @author: lichen
  * @email : 1960003945@qq.com
  * @description :
  */
-public class AudioPusher implements ILivePusher {
+public class SmartLivePusher implements ILivePusher {
+
+    protected VideoPusher videoPusher;
+    protected AudioPusher audioPusher;
+    protected LiveBridge liveBridge;
+
+
+    public SmartLivePusher() {
+        liveBridge = new LiveBridge();
+        videoPusher = new VideoPusher(liveBridge);
+        audioPusher = new AudioPusher();
+    }
+
 
     @Override
     public void init(Context context, LivePushConfig livePushConfig) {
@@ -25,7 +38,7 @@ public class AudioPusher implements ILivePusher {
 
     @Override
     public void startPreview(SurfaceView surfaceView) {
-
+        videoPusher.startPreview(surfaceView);
     }
 
     @Override
@@ -65,6 +78,9 @@ public class AudioPusher implements ILivePusher {
 
     @Override
     public void stopPush() {
-
+        videoPusher.stopPush();
+        audioPusher.stopPush();
     }
+
+
 }

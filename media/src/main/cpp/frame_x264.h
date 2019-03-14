@@ -49,7 +49,7 @@ public:
     /* open for encoding */
     bool openX264Encode();
     /* encode the given data */
-    int encodeFrame(char* inBytes, int frameSize, int pts, char* outBytes, int *outFrameSize);
+    int encodeFrame(char* inBytes, int pts);
     /* close the encoder and file, frees all memory */
     bool close();
     /* validates if all params are set correctly, like width,height, etc.. */

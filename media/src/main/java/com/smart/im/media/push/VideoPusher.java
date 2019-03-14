@@ -1,10 +1,11 @@
 package com.smart.im.media.push;
 
+import android.content.Context;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.smart.im.media.bean.VideoParam;
+import com.smart.im.media.bean.LivePushConfig;
 import com.smart.im.media.bridge.LiveBridge;
 import com.smart.im.media.utils.CameraUtil;
 
@@ -14,24 +15,20 @@ import com.smart.im.media.utils.CameraUtil;
  * @email : 1960003945@qq.com
  * @description :
  */
-public class VideoPusher extends Pusher implements SurfaceHolder.Callback, Camera.PreviewCallback {
+public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.PreviewCallback {
 
     private SurfaceView surfaceView;
-    private VideoParam videoParam;
     private Camera camera;
     private boolean isPushing;
 
     private CameraUtil cameraUtil;
     private LiveBridge liveBridge;
 
-    public VideoPusher(SurfaceView surfaceView, VideoParam videoParam, LiveBridge liveBridge) {
-        this.surfaceView = surfaceView;
-        this.videoParam = videoParam;
+    public VideoPusher(LiveBridge liveBridge) {
         this.liveBridge = liveBridge;
-
-        cameraUtil = new CameraUtil(surfaceView.getContext());
-        surfaceView.getHolder().addCallback(this);
+        cameraUtil = new CameraUtil();
     }
+
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
@@ -53,14 +50,57 @@ public class VideoPusher extends Pusher implements SurfaceHolder.Callback, Camer
 
     }
 
+
     @Override
-    public void prepare() {
-        cameraUtil.initCamera(cameraUtil.getCurrentType());
-        cameraUtil.startPreview(surfaceView.getHolder(), this);
+    public void init(Context context, LivePushConfig livePushConfig) {
+
     }
 
     @Override
-    public void startPush() {
+    public void destroy() {
+
+    }
+
+    @Override
+    public void startPreview(SurfaceView surfaceView) {
+        cameraUtil.initCamera(cameraUtil.getCurrentType());
+        cameraUtil.startPreview(surfaceView.getHolder(), this);
+        cameraUtil = new CameraUtil(surfaceView.getContext());
+        surfaceView.getHolder().addCallback(this);
+    }
+
+    @Override
+    public void startPreviewAysnc(SurfaceView surfaceView) {
+
+    }
+
+    @Override
+    public void stopPreview() {
+
+    }
+
+    @Override
+    public void startPush(String url) {
+
+    }
+
+    @Override
+    public void startPushAysnc(String url) {
+
+    }
+
+    @Override
+    public void restartPush() {
+
+    }
+
+    @Override
+    public void restartPushAync() {
+
+    }
+
+    @Override
+    public void reconnectPushAsync(String url) {
 
     }
 
@@ -69,8 +109,5 @@ public class VideoPusher extends Pusher implements SurfaceHolder.Callback, Camer
 
     }
 
-    @Override
-    public void release() {
 
-    }
 }

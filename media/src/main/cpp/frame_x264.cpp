@@ -70,8 +70,9 @@ bool Frame_X264::openX264Encode() {
     return true;
 }
 
-int Frame_X264::encodeFrame(char *inBytes, int frameSize, int pts, char *outBytes,
-                            int *outFrameSize) {
+int Frame_X264::encodeFrame(char *inBytes, int pts) {
+    int *outFrameSize;
+    char *outBytes;
 //YUV420P数据转化为h264
     int i420_y_size = in_width * in_height;
     int i420_u_size = (in_width >> 1) * (in_height >> 1);
@@ -90,6 +91,7 @@ int Frame_X264::encodeFrame(char *inBytes, int frameSize, int pts, char *outByte
     //最主要的函数，x264编码，pic_in为x264输入，pic_out为x264输出
     int frame_size = x264_encoder_encode(encoder, &nals, &num_nals, &pic_in,
                                          &pic_out);
+
 
     if (frame_size) {
         /*Here first four bytes proceeding the nal unit indicates frame length*/

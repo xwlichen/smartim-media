@@ -7,9 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.SurfaceView;
 
-import com.smart.im.media.bean.AudioParam;
-import com.smart.im.media.bean.VideoParam;
-import com.smart.im.media.push.LivePusher;
+import com.smart.im.media.bean.LivePushConfig;
+import com.smart.im.media.push.SmartLivePusher;
 
 /**
  * @date : 2019/3/12 下午1:43
@@ -18,7 +17,7 @@ import com.smart.im.media.push.LivePusher;
  * @description :
  */
 public class LiveActivity extends Activity {
-    LivePusher livePusher;
+    SmartLivePusher livePusher;
     SurfaceView surfaceView;
 
     @Override
@@ -31,40 +30,25 @@ public class LiveActivity extends Activity {
 
 
     public void initPusher() {
-        VideoParam videoParam = initVideoParams();
-        AudioParam audioParam = initAudioParams();
-        livePusher = new LivePusher(surfaceView, videoParam, audioParam);
+        LivePushConfig config=new LivePushConfig();
+        livePusher = new SmartLivePusher();
+        livePusher.init(this,config);
+    }
+
+    public void initPushConfig(){
+        LivePushConfig config=new LivePushConfig();
     }
 
 
-    public VideoParam initVideoParams() {
-        int width = 640;//分辨率设置很重要
-        int height = 480;
-        int videoBitRate = 1500;//kb/s jason-->480kb
-        int videoFrameRate = 25;//fps
-        VideoParam videoParam = new VideoParam(width, height,
-                Camera.CameraInfo.CAMERA_FACING_BACK, videoBitRate, videoFrameRate);
-        return videoParam;
-    }
 
-    public AudioParam initAudioParams() {
-        int sampleRate = 44100;//采样率：Hz
-        int channelConfig = AudioFormat.CHANNEL_IN_STEREO;//立体声道
-        int audioFormat = AudioFormat.ENCODING_PCM_16BIT;//pcm16位
-        int numChannels = 2;//声道数
-        AudioParam audioParam = new AudioParam(sampleRate, channelConfig, audioFormat, numChannels);
-        return audioParam;
-    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        livePusher.prepare();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        livePusher.release();
     }
 }
