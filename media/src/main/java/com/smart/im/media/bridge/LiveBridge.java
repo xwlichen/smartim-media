@@ -9,6 +9,9 @@ package com.smart.im.media.bridge;
 public class LiveBridge {
 
 
-    private native void setVideoParam(int width, int height, int bitRate, int frameRate);
-    private native void setAudioParam(int sampleRate, int numChannels);
+    private native void initVideoParam(int width, int height, int bitRate, int frameRate);
+    private native void intAudioParam(int sampleRate, int numChannels);
+    private native void initRtmpParam(String url);
+
+    private native void pushVideoData(byte[] data);
 }

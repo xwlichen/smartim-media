@@ -13,9 +13,7 @@
 #include <x264.h>
 
 
-namespace frame_x264{
-    void setParams();
-}
+
 
 
 
@@ -49,7 +47,7 @@ public:
     Frame_X264();
     ~Frame_X264();  //作用：对象消亡时，自动被调用，用来释放对象占用的空间
     /* open for encoding */
-    bool open();
+    bool openX264Encode();
     /* encode the given data */
     int encodeFrame(char* inBytes, int frameSize, int pts, char* outBytes, int *outFrameSize);
     /* close the encoder and file, frees all memory */
@@ -57,7 +55,9 @@ public:
     /* validates if all params are set correctly, like width,height, etc.. */
     bool validateSettings();
     /* sets the x264 params */
-    void setParams();
+    void setX264Params();
+
+
     int getFps() const;  //保证值不会更改
     void setFps(int fps);
     int getInHeight() const;
