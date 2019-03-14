@@ -32,12 +32,12 @@ Frame_X264::~Frame_X264() {
 }
 
 
-bool Frame_X264::openX264Encode() {
+bool Frame_X264::open_x264_Encode() {
     int r = 0;
     int nheader = 0;
     int header_size = 0;
 
-    if (!validateSettings()) {
+    if (!validate_settings()) {
         return false;
     }
 
@@ -47,7 +47,7 @@ bool Frame_X264::openX264Encode() {
     }
 
     // set encoder parameters
-    setX264Params();
+    set_x264_params();
     //按照色度空间分配内存，即为图像结构体x264_picture_t分配内存，并返回内存的首地址作为指针
     //i_csp(图像颜色空间参数，目前只支持I420/YUV420)为X264_CSP_I420
     x264_picture_alloc(&pic_in, params.i_csp, params.i_width, params.i_height);
@@ -70,7 +70,7 @@ bool Frame_X264::openX264Encode() {
     return true;
 }
 
-int Frame_X264::encodeFrame(char *inBytes, int pts) {
+int Frame_X264::encode_frame(char *inBytes, int pts) {
     int *outFrameSize;
     char *outBytes;
 //YUV420P数据转化为h264
@@ -123,7 +123,7 @@ int Frame_X264::encodeFrame(char *inBytes, int pts) {
 }
 
 
-void Frame_X264::setX264Params() {
+void Frame_X264::set_x264_params() {
 //preset
     //默认：medium
     //一些在压缩效率和运算时间中平衡的预设值。如果指定了一个预设值，它会在其它选项生效前生效。
@@ -192,7 +192,7 @@ void Frame_X264::setX264Params() {
 
 }
 
-bool Frame_X264::validateSettings() {
+bool Frame_X264::validate_settings() {
     if (!in_width) {
         LOGE(JNI_DEBUG, "No in_width set");
         return false;
@@ -301,4 +301,8 @@ int Frame_X264::getBFrameFrq() const {
 void Frame_X264::setBFrameFrq(int frameFrq) {
     b_frame_frq = frameFrq;
 }
+
+x264_nal_t* Frame_X264::get_x264_nal_t() {
+    return nals;
+};
 

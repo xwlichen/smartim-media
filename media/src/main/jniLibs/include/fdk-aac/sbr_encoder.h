@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+ï¿½ Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Fï¿½rderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -377,7 +377,7 @@ void sbrEncoder_Close(HANDLE_SBR_ENCODER *phEbrEncoder);
  * \param sbrData       SBR payload.
  * \return              0 on success, and non-zero if failed.
  */
-INT sbrEncoder_EncodeFrame(HANDLE_SBR_ENCODER  hEnvEncoder,
+INT sbrEncoder_encode_frame(HANDLE_SBR_ENCODER  hEnvEncoder,
                            INT_PCM            *samples,
                            UINT                timeInStride,
                            UINT                sbrDataBits[(8)],

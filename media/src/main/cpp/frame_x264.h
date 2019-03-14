@@ -47,15 +47,15 @@ public:
     Frame_X264();
     ~Frame_X264();  //作用：对象消亡时，自动被调用，用来释放对象占用的空间
     /* open for encoding */
-    bool openX264Encode();
+    bool open_x264_Encode();
     /* encode the given data */
-    int encodeFrame(char* inBytes, int pts);
+    int encode_frame(char* inBytes, int pts);
     /* close the encoder and file, frees all memory */
     bool close();
     /* validates if all params are set correctly, like width,height, etc.. */
-    bool validateSettings();
+    bool validate_settings();
     /* sets the x264 params */
-    void setX264Params();
+    void set_x264_params();
 
 
     int getFps() const;  //保证值不会更改
@@ -80,6 +80,9 @@ public:
     void setIThreads(int threads);
     int getBFrameFrq() const;
     void setBFrameFrq(int frameFrq);
+
+
+    x264_nal_t* get_x264_nal_t();
 };
 
 

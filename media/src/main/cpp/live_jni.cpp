@@ -10,6 +10,8 @@
 #include <string>
 #include "frame_x264.h"
 #include "img_utils.h"
+#include "rtmp_utils.h"
+
 using namespace imgt;
 
 
@@ -40,24 +42,23 @@ extern "C" {
 
 
 Frame_X264 *frame_x264;
-
-
+RtmpUtils *rtmpUtils;
 
 
 JNIEXPORT void JNICALL
 Java_com_smart_im_media_bridge_LiveBridge_initVideoConfig(JNIEnv *env,
-                                                         jobject instance,
-                                                         jint width,
-                                                         jint height,
-                                                         jint bitRate,
-                                                         jint frameRate) {
+                                                          jobject instance,
+                                                          jint width,
+                                                          jint height,
+                                                          jint bitRate,
+                                                          jint frameRate) {
 
-    frame_x264=new Frame_X264();
+    frame_x264 = new Frame_X264();
     frame_x264->setInWidth(width);
     frame_x264->setInHeight(height);
     frame_x264->setBitrate(bitRate);
     frame_x264->setFps(frameRate);
-    frame_x264->openX264Encode();
+    frame_x264->open_x264_Encode();
 
 
 }
@@ -65,7 +66,7 @@ Java_com_smart_im_media_bridge_LiveBridge_initVideoConfig(JNIEnv *env,
 
 JNIEXPORT void JNICALL
 Java_com_smart_im_media_bridge_LiveBridge_initAudioConfig(JNIEnv *env, jobject instance,
-                                                        jint sampleRate, jint numChannels) {
+                                                          jint sampleRate, jint numChannels) {
 
 
 }
@@ -73,8 +74,11 @@ Java_com_smart_im_media_bridge_LiveBridge_initAudioConfig(JNIEnv *env, jobject i
 
 JNIEXPORT void JNICALL
 Java_com_smart_im_media_bridge_LiveBridge_initRtmp(JNIEnv *env, jobject instance,
-                                                        jstring url_) {
+                                                   jstring url_) {
     const char *url = env->GetStringUTFChars(url_, 0);
+
+    rtmpUtils = new RtmpUtils();
+    rtmpUtils->init((unsigned char *) url);
 
     // TODO
 
@@ -82,7 +86,7 @@ Java_com_smart_im_media_bridge_LiveBridge_initRtmp(JNIEnv *env, jobject instance
 }
 
 char *dst_i420_data;
-int fts=0;
+int fts = 0;
 char *dst_h264_data;
 
 JNIEXPORT void JNICALL
@@ -91,9 +95,11 @@ Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env, jobject ins
     jbyte *data = env->GetByteArrayElements(data_, NULL);
 
 
-    nav21ToI420((char*)data,dst_i420_data,frame_x264->getInWidth(),frame_x264->getInHeight());
+    nav21ToI420((char *) data, dst_i420_data, frame_x264->getInWidth(), frame_x264->getInHeight());
     fts++;
-    frame_x264->encodeFrame(dst_i420_data,fts,dst_h264_data);
+    int nal_num = frame_x264->encode_frame(dst_i420_data, fts);
+    rtmpUtils->add_x264_data(frame_x264->get_x264_nal_t(), nal_num);
+
 
     env->ReleaseByteArrayElements(data_, data, 0);
 }

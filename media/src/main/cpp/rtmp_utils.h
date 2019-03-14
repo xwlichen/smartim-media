@@ -22,28 +22,36 @@ extern "C" {
 }
 
 
-
 #define RTMP_MAX_HEADER_SIZE 18
 
 class RtmpUtils {
 
 
 public :
-    unsigned char* rtmp_url;
-     int start_time;
+    unsigned char *rtmp_url;
+    int start_time;
+
     int getSampleRateIndex(int sampleRate);
+
     RTMP *rtmp;
 
     RtmpUtils();
+
     ~RtmpUtils();
 
-    void init(unsigned char* url);
+    void init(unsigned char *url);
 
-    void addX264Data(x264_nal_t *nal, int nal_num);
+    void add_x264_data(x264_nal_t *nal, int nal_num);
 
-    void addX264Header(unsigned char *sps, int sps_len, unsigned char *pps, int pps_len);
+    void add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, int pps_len);
 
-    void addX264Body(uint8_t *buf, int len);
+    void add_x264_body(uint8_t *buf, int len);
+
+    void add_packet(RTMPPacket *rtmpPacket);
+
+    void init_thread();
+
+    void *push_thread(void * args);
 };
 
 #endif //SMARTIM_MEDIA_RTMP_UTILS_H
