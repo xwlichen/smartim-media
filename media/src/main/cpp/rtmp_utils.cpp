@@ -7,10 +7,13 @@
 //
 #include "rtmp_utils.h"
 #include "log.h"
-#include "queue.h"
 #include <jni.h>
 #include <stdint.h>
 #include <malloc.h>
+
+extern "C" {
+#include "queue.h"
+}
 
 #define RTMP_HEAD_SIZE   (sizeof(RTMPPacket) + RTMP_MAX_HEADER_SIZE)
 
@@ -18,11 +21,12 @@ pthread_mutex_t mutex;
 pthread_cond_t cond;
 
 //子线程回调给Java需要用到JavaVM
-JavaVM* javaVM;
+JavaVM *javaVM;
 //调用类
 jobject jobject_error;
 
 int is_pushing = FALSE;
+int start_time;
 
 
 RtmpUtils::RtmpUtils() {
@@ -168,11 +172,12 @@ RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, i
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
     packet->m_nInfoField2 = rtmp->m_stream_id;
 
+    add_packet(packet);
     //send rtmp
-    if (RTMP_IsConnected(rtmp)) {
-        RTMP_SendPacket(rtmp, packet, TRUE);
-        //LOGD("send packet sendSpsAndPps");
-    }
+//    if (RTMP_IsConnected(rtmp)) {
+//        RTMP_SendPacket(rtmp, packet, TRUE);
+//        //LOGD("send packet sendSpsAndPps");
+//    }
     free(packet);
 }
 
@@ -188,11 +193,11 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
         len -= 3;
     }
     int body_size = len + 9;
-    RTMPPacket *packet = (RTMPPacket *)malloc(RTMP_HEAD_SIZE + 9 + len);
+    RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 9 + len);
     memset(packet, 0, RTMP_HEAD_SIZE);
-    packet->m_body = (char *)packet + RTMP_HEAD_SIZE;
+    packet->m_body = (char *) packet + RTMP_HEAD_SIZE;
 
-    unsigned char *body = (unsigned char*)packet->m_body;
+    unsigned char *body = (unsigned char *) packet->m_body;
     //当NAL头信息中，type（5位）等于5，说明这是关键帧NAL单元
     //buf[0] NAL Header与运算，获取type，根据type判断关键帧和普通帧
     //00000101 & 00011111(0x1f) = 00000101
@@ -231,11 +236,13 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
     //记录了每一个tag相对于第一个tag（File Header）的相对时间
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
 
+    add_packet(packet);
+
     //send rtmp h264 body data
-    if (RTMP_IsConnected(rtmp)) {
-        RTMP_SendPacket(rtmp, packet, TRUE);
-        //LOGD("send packet sendVideoData");
-    }
+//    if (RTMP_IsConnected(rtmp)) {
+//        RTMP_SendPacket(rtmp, packet, TRUE);
+//        //LOGD("send packet sendVideoData");
+//    }
     free(packet);
 }
 
@@ -250,25 +257,25 @@ void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
 }
 
 
-void* RtmpUtils::push_thread(void *args) {
+void *push_thread(void *args) {
     //建立RTMP连接
-    RTMP* rtmp = RTMP_Alloc();
-    if(!rtmp){
-        LOGE(JNI_DEBUG,"RTMP_Alloc fail...");
+    RTMP *rtmp = RTMP_Alloc();
+    if (!rtmp) {
+        LOGE(JNI_DEBUG, "RTMP_Alloc fail...");
         goto end;
     }
-    if(!RTMP_Connect(rtmp, NULL)){
-        LOGE(JNI_DEBUG,"RTMP_Connect fail...");
+    if (!RTMP_Connect(rtmp, NULL)) {
+        LOGE(JNI_DEBUG, "RTMP_Connect fail...");
 //        throw_error_to_java(ERROR_RTMP_CONNECT);
         goto end;
     }
-    LOGI(JNI_DEBUG,"RTMP_Connect success...");
-    if(!RTMP_ConnectStream(rtmp, 0)){
-        LOGE(JNI_DEBUG,"RTMP_ConnectStream fail...");
+    LOGI(JNI_DEBUG, "RTMP_Connect success...");
+    if (!RTMP_ConnectStream(rtmp, 0)) {
+        LOGE(JNI_DEBUG, "RTMP_ConnectStream fail...");
 //        throw_error_to_java(ERROR_RTMP_CONNECT_STREAM);
         goto end;
     }
-    LOGI(JNI_DEBUG,"RTMP_ConnectStream success...");
+    LOGI(JNI_DEBUG, "RTMP_ConnectStream success...");
 
     //开始计时
     start_time = RTMP_GetTime();
@@ -276,17 +283,17 @@ void* RtmpUtils::push_thread(void *args) {
     //发送一个ACC HEADER
 //    add_aac_header();
     //循环推流
-    while(is_pushing) {
+    while (is_pushing) {
         pthread_mutex_lock(&mutex);
         pthread_cond_wait(&cond, &mutex);
         //从队头去一个RTMP包出来
         RTMPPacket *packet = static_cast<RTMPPacket *>(queue_get_first());
-        if(packet){
+        if (packet) {
             queue_delete_first();
             //发送rtmp包，true代表rtmp内部有缓存
             int ret = RTMP_SendPacket(rtmp, packet, TRUE);
-            if(!ret){
-                LOGE(JNI_DEBUG,"RTMP_SendPacket fail...");
+            if (!ret) {
+                LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
                 RTMPPacket_Free(packet);
                 pthread_mutex_unlock(&mutex);
 //                throw_error_to_java(ERROR_RTMP_SEND_PACKAT);
@@ -297,9 +304,10 @@ void* RtmpUtils::push_thread(void *args) {
         pthread_mutex_unlock(&mutex);
     }
     end:
-    LOGI(JNI_DEBUG,"free all the thing about rtmp...");
+    LOGI(JNI_DEBUG, "free all the thing about rtmp...");
     RTMP_Close(rtmp);
     free(rtmp);
+    return 0;
 }
 
 void RtmpUtils::init_thread() {

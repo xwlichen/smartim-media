@@ -23,9 +23,9 @@ public interface  ILivePusher {
 
     void stopPreview();
 
-    void startPush(String url);
+    void startPush();
 
-    void startPushAysnc(String url);
+    void startPushAysnc();
 
     void restartPush();
 

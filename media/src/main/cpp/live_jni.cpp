@@ -8,41 +8,73 @@
 
 #include <jni.h>
 #include <string>
+#include "log.h"
 #include "frame_x264.h"
-#include "img_utils.h"
 #include "rtmp_utils.h"
-
-using namespace imgt;
+#include "img_utils.h"
 
 
 extern "C" {
-//JNIEXPORT void JNICALL
-//Java_com_smart_im_media_bridge_LiveBridge_initVideoConfig(JNIEnv *env,
-//                                                         jobject instance,
-//                                                         jint width,
-//                                                         jint height,
-//                                                         jint bitRate,
-//                                                         jint frameRate);
-//JNIEXPORT void JNICALL
-//Java_com_smart_im_media_bridge_LiveBridge_initAudioConfig(JNIEnv *env,
-//                                                        jobject instance,
-//                                                        jint sampleRate,
-//                                                        jint numChannels);
-//JNIEXPORT void JNICALL
-//Java_com_smart_im_media_bridge_LiveBridge_initRtmp(JNIEnv *env,
-//                                                        jobject instance,
-//                                                        jstring url_);
-//JNIEXPORT void JNICALL
-//Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env,
-//                                                        jobject instance,
-//                                                        jbyteArray data_);
+
+
+JNIEXPORT void JNICALL
+Java_com_smart_im_media_bridge_LiveBridge_initVideoConfig(JNIEnv *env,
+                                                          jobject instance,
+                                                          jint width,
+                                                          jint height,
+                                                          jint bitRate,
+                                                          jint frameRate);
+JNIEXPORT void JNICALL
+Java_com_smart_im_media_bridge_LiveBridge_initAudioConfig(JNIEnv *env,
+                                                          jobject instance,
+                                                          jint sampleRate,
+                                                          jint numChannels);
+JNIEXPORT void JNICALL
+Java_com_smart_im_media_bridge_LiveBridge_initRtmp(JNIEnv *env,
+                                                   jobject instance,
+                                                   jstring url_);
+JNIEXPORT void JNICALL
+Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env,
+                                                        jobject instance,
+                                                        jbyteArray data_);
 }
 
 //------------------------------------------------------------------------------------------------------------------------
 
 
+//void nav21ToI420(char *src_n21_data, char *dst_i420_data, int width, int height) {
+//    //Y通道数据大小
+//    int src_y_size = width * height;
+//    //U通道数据大小
+//    int src_u_size = (width >> 1) * (height >> 1);
+//
+//    //NV21中Y通道数据
+//    char *src_nv21_y_data = src_n21_data;
+//    //由于是连续存储的Y通道数据后即为VU数据，它们的存储方式是交叉存储的
+//    char *src_nv21_vu_data = src_n21_data + src_y_size;  //指针位移
+//
+//    //YUV420P中Y通道数据
+//    char *src_i420_y_data = dst_i420_data;
+//    //YUV420P中U通道数据
+//    char *src_i420_u_data = dst_i420_data + src_y_size;
+//    //YUV420P中V通道数据
+//    char *src_i420_v_data = dst_i420_data + src_y_size + src_u_size;
+//
+//    //直接调用libyuv中接口，把NV21数据转化为YUV420P标准数据，此时，它们的存储大小是不变的
+//    libyuv::NV21ToI420((const uint8 *) src_nv21_y_data, width,
+//                       (const uint8 *) src_nv21_vu_data, width,
+//                       (uint8 *) src_i420_y_data, width,
+//                       (uint8 *) src_i420_u_data, width >> 1,
+//                       (uint8 *) src_i420_v_data, width >> 1,
+//                       width, height);
+//}
+
+
+
+
 Frame_X264 *frame_x264;
 RtmpUtils *rtmpUtils;
+ImgUtils *imgUtils;
 
 
 JNIEXPORT void JNICALL
@@ -80,24 +112,28 @@ Java_com_smart_im_media_bridge_LiveBridge_initRtmp(JNIEnv *env, jobject instance
     rtmpUtils = new RtmpUtils();
     rtmpUtils->init((unsigned char *) url);
 
+    imgUtils=new ImgUtils();
+
     // TODO
 
     env->ReleaseStringUTFChars(url_, url);
 }
 
-char *dst_i420_data;
+
 int fts = 0;
 char *dst_h264_data;
 
 JNIEXPORT void JNICALL
 Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env, jobject instance,
                                                         jbyteArray data_) {
+
     jbyte *data = env->GetByteArrayElements(data_, NULL);
+    jbyte *dst_i420_data= (jbyte *) malloc(sizeof(jbyte) * frame_x264->getInWidth() * frame_x264->getInHeight() * 3 / 2);
+    rtmpUtils->init_thread();
 
-
-    nav21ToI420((char *) data, dst_i420_data, frame_x264->getInWidth(), frame_x264->getInHeight());
+    imgUtils->nav21ToI420(data, dst_i420_data, frame_x264->getInWidth(), frame_x264->getInHeight());
     fts++;
-    int nal_num = frame_x264->encode_frame(dst_i420_data, fts);
+    int nal_num = frame_x264->encode_frame((char *)dst_i420_data, fts);
     rtmpUtils->add_x264_data(frame_x264->get_x264_nal_t(), nal_num);
 
 

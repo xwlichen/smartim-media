@@ -39,12 +39,12 @@ public class AudioPusher implements ILivePusher {
     }
 
     @Override
-    public void startPush(String url) {
+    public void startPush() {
 
     }
 
     @Override
-    public void startPushAysnc(String url) {
+    public void startPushAysnc() {
 
     }
 

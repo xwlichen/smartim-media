@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -38,6 +39,14 @@ public class CameraUtil {
         this.context = context;
     }
 
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
     public int getCurrentType() {
         return currentType;
     }
@@ -58,6 +67,7 @@ public class CameraUtil {
         //先判断是否支持该分辨率
         Camera.Size maxSize = null;
         for (Camera.Size size : parms.getSupportedPreviewSizes()) {
+            Log.e("xw", size.width +"*"+ size.height + "");
             //满足16:9的才进行使用并且小于等于width的才进行使用
             if (size.width * height == size.height * width && size.width <= width) {
                 if (maxSize == null) {
@@ -151,7 +161,7 @@ public class CameraUtil {
         rotation = setCameraDisplayRotation(cameraId);
 
         Camera.Parameters parameters = camera.getParameters();
-        chooseCameraSize(parameters, preWidth, preHeight,1);
+        chooseCameraSize(parameters, preWidth, preHeight, 1);
         List<String> focusModes = parameters.getSupportedFocusModes();
         //这边采用自动对焦的模式
         if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
@@ -162,12 +172,16 @@ public class CameraUtil {
         parameters.setPreviewFormat(ImageFormat.NV21);
         parameters.setPictureFormat(ImageFormat.NV21);
         camera.setParameters(parameters);
+
+
         /**
          * 请注意这个地方, camera返回的图像并不一定是设置的大小（因为可能并不支持）
          */
         Camera.Size size = camera.getParameters().getPreviewSize();
         preWidth = size.width;
         preHeight = size.height;
+
+
     }
 
     public void releaseCamera() {

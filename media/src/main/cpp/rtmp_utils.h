@@ -29,7 +29,7 @@ class RtmpUtils {
 
 public :
     unsigned char *rtmp_url;
-    int start_time;
+
 
     int getSampleRateIndex(int sampleRate);
 
@@ -51,7 +51,7 @@ public :
 
     void init_thread();
 
-    void *push_thread(void * args);
+//    static void *push_thread(void * args);
 };
 
 #endif //SMARTIM_MEDIA_RTMP_UTILS_H

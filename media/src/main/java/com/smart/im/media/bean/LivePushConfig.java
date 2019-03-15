@@ -10,8 +10,10 @@ import android.media.AudioFormat;
  */
 public class LivePushConfig {
 
-    private int width = 640;//分辨率设置很重要
-    private int height = 480;
+    private String url;
+
+    private int width = 1920;//分辨率设置很重要
+    private int height = 1080;
     private int bitRate = 1500;//kb/s jason-->480kb
     private int frameRate = 25;//fps
     private int sampleRate = 44100;//采样率：Hz
@@ -31,6 +33,14 @@ public class LivePushConfig {
         this.channelConfig = channelConfig;
         this.audioFormat = audioFormat;
         this.numChannels = numChannels;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public int getWidth() {

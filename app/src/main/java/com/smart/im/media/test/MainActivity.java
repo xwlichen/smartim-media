@@ -20,8 +20,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         TextView textView = findViewById(R.id.textView);
-        String s = FFmpegBridge.test();
-        textView.setText(s);
+//        String s = FFmpegBridge.test();
+//        textView.setText(s);
 
         textView.setOnClickListener(new View.OnClickListener() {
             @Override

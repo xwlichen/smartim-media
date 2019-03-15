@@ -19,10 +19,11 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
 
     private SurfaceView surfaceView;
     private Camera camera;
-    private boolean isPushing;
+    private boolean isPushing = false;
 
     private CameraUtil cameraUtil;
     private LiveBridge liveBridge;
+
 
     public VideoPusher(LiveBridge liveBridge) {
         this.liveBridge = liveBridge;
@@ -32,6 +33,11 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
+
+        if (isPushing) {
+            isPushing=false;
+            liveBridge.pushVideoData(data);
+        }
 
     }
 
@@ -63,9 +69,10 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
 
     @Override
     public void startPreview(SurfaceView surfaceView) {
+        this.surfaceView=surfaceView;
+        cameraUtil.setContext(surfaceView.getContext());
         cameraUtil.initCamera(cameraUtil.getCurrentType());
         cameraUtil.startPreview(surfaceView.getHolder(), this);
-        cameraUtil = new CameraUtil(surfaceView.getContext());
         surfaceView.getHolder().addCallback(this);
     }
 
@@ -80,12 +87,13 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
     }
 
     @Override
-    public void startPush(String url) {
+    public void startPush() {
+        this.isPushing = true;
 
     }
 
     @Override
-    public void startPushAysnc(String url) {
+    public void startPushAysnc() {
 
     }
 
@@ -106,6 +114,7 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
 
     @Override
     public void stopPush() {
+        this.isPushing = false;
 
     }
 

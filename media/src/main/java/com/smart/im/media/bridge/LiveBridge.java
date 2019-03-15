@@ -10,15 +10,19 @@ import com.smart.im.media.bean.LivePushConfig;
  */
 public class LiveBridge {
 
+    static {
+        System.loadLibrary("smart-live");
+    }
 
-    private native void initVideoConfig(int width, int height, int bitRate, int frameRate);
 
-    private native void initAudioConfig(int sampleRate, int numChannels);
+    public native void initVideoConfig(int width, int height, int bitRate, int frameRate);
+
+    public native void initAudioConfig(int sampleRate, int numChannels);
 
 
-    private native void initRtmp(String url);
+    public native void initRtmp(String url);
 
-    private native void pushVideoData(byte[] data);
+    public native void pushVideoData(byte[] data);
 
 
     public void initLivePushConfig(LivePushConfig config) {
@@ -35,4 +39,6 @@ public class LiveBridge {
                 config.getNumChannels());
 
     }
+
+
 }

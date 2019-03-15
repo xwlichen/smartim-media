@@ -14,21 +14,29 @@ import com.smart.im.media.bridge.LiveBridge;
  */
 public class SmartLivePusher implements ILivePusher {
 
-    protected VideoPusher videoPusher;
-    protected AudioPusher audioPusher;
-    protected LiveBridge liveBridge;
+    private VideoPusher videoPusher;
+    private AudioPusher audioPusher;
+    private LiveBridge liveBridge;
+
+    private LivePushConfig config;
+    private Context context;
 
 
     public SmartLivePusher() {
-        liveBridge = new LiveBridge();
-        videoPusher = new VideoPusher(liveBridge);
-        audioPusher = new AudioPusher();
+
     }
 
 
     @Override
-    public void init(Context context, LivePushConfig livePushConfig) {
+    public void init(Context context, LivePushConfig config) {
+        this.config = config;
+        this.context = context;
 
+        liveBridge = new LiveBridge();
+        videoPusher = new VideoPusher(liveBridge);
+        audioPusher = new AudioPusher();
+
+        liveBridge.initLivePushConfig(config);
     }
 
     @Override
@@ -52,12 +60,14 @@ public class SmartLivePusher implements ILivePusher {
     }
 
     @Override
-    public void startPush(String url) {
+    public void startPush() {
+        liveBridge.initRtmp(config.getUrl());
+        videoPusher.startPush();
 
     }
 
     @Override
-    public void startPushAysnc(String url) {
+    public void startPushAysnc() {
 
     }
 

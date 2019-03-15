@@ -6,6 +6,8 @@ import android.media.AudioFormat;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
 
 import com.smart.im.media.bean.LivePushConfig;
 import com.smart.im.media.push.SmartLivePusher;
@@ -19,27 +21,33 @@ import com.smart.im.media.push.SmartLivePusher;
 public class LiveActivity extends Activity {
     SmartLivePusher livePusher;
     SurfaceView surfaceView;
+    Button btnStart;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live);
         surfaceView = findViewById(R.id.surfaceView);
+        btnStart = findViewById(R.id.btnStart);
         initPusher();
+
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                livePusher.startPush();
+            }
+        });
     }
 
 
     public void initPusher() {
-        LivePushConfig config=new LivePushConfig();
+        LivePushConfig config = new LivePushConfig();
+        String url = "rtmp://livepush.changguwen.com/changdao/fancyRoom?auth_key=1552546884-44c66a62587945a792658054fb9ea046-0-cc5ca7b874b86d0b944ab1096ba372c5";
+        config.setUrl(url);
         livePusher = new SmartLivePusher();
-        livePusher.init(this,config);
+        livePusher.init(this, config);
+        livePusher.startPreview(surfaceView);
     }
-
-    public void initPushConfig(){
-        LivePushConfig config=new LivePushConfig();
-    }
-
-
 
 
     @Override

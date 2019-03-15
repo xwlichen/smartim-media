@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 #判断编译器类型,如果是gcc编译器,则在编译选项中加入c++11支持
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
@@ -22,23 +22,31 @@ set(distribution_DIR ${CMAKE_SOURCE_DIR}/../../../../src/main/jniLibs)
 
 
 
+#add_library( # Sets the name of the library.
+#        ffmpeg-jni
+#
+#        # Sets the library as a shared library.
+#        SHARED
+#
+#
+#        # Provides a relative path to your source file(s).
+#        src/main/cpp/ffmpeg-jni.cpp
+#        src/main/cpp/log.cpp)
+
 add_library( # Sets the name of the library.
-        ffmpeg-jni
+        smart-live
 
         # Sets the library as a shared library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        src/main/cpp/ffmpeg-jni.cpp)
-
-add_library( # Sets the name of the library.
-        lib-live
-
-        # Sets the library as a shared library.
-        SHARED
-
-        # Provides a relative path to your source file(s).
-        src/main/cpp/ffmpeg-jni.cpp)
+        src/main/cpp/live_jni.cpp
+        src/main/cpp/frame_x264.cpp
+        src/main/cpp/log.cpp
+        src/main/cpp/img_utils.cpp
+        src/main/cpp/rtmp_utils.cpp
+        src/main/cpp/queue.c
+        )
 
 # 编解码(最重要的库)
 add_library(
@@ -178,7 +186,8 @@ find_library( # Sets the name of the path variable.
 
 
 target_link_libraries( # Specifies the target library.
-        ffmpeg-jni
+#        ffmpeg-jni
+        smart-live
 
         avcodec
         avdevice

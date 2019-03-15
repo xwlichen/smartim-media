@@ -9,8 +9,15 @@
 #define SMARTIM_MEDIA_FRAME_X264_H
 
 
+//#include <libavcodec/avcodec.h>
+//#include <x264.h>
+
+extern "C" {
+#include <libswscale/swscale.h>
+#include <libavutil/pixfmt.h>
 #include <libavcodec/avcodec.h>
 #include <x264.h>
+}
 
 
 

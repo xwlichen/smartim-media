@@ -94,28 +94,28 @@ int Frame_X264::encode_frame(char *inBytes, int pts) {
 
 
     if (frame_size) {
-        /*Here first four bytes proceeding the nal unit indicates frame length*/
-        int have_copy = 0;
-        //编码后，h264数据保存为nal了，我们可以获取到nals[i].type的类型判断是sps还是pps
-        //或者是否是关键帧，nals[i].i_payload表示数据长度，nals[i].p_payload表示存储的数据
-        //编码后，我们按照nals[i].i_payload的长度来保存copy h264数据的，然后抛给java端用作
-        //rtmp发送数据，outFrameSize是变长的，当有sps pps的时候大于1，其它时候值为1
-        for (int i = 0; i < num_nals; i++) {
-            outFrameSize[i] = nals[i].i_payload;
-            memcpy(outBytes + have_copy, nals[i].p_payload, nals[i].i_payload);
-            have_copy += nals[i].i_payload;
-        }
-#ifdef ENCODE_OUT_FILE_1
-        fwrite(outBytes, 1, frame_size, out1);
-#endif
-
-#ifdef ENCODE_OUT_FILE_2
-        for (int i = 0; i < frame_size; i++) {
-            outBytes[i] = (char) nals[0].p_payload[i];
-        }
-        fwrite(outBytes, 1, frame_size, out2);
-        *outFrameSize = frame_size;
-#endif
+//        /*Here first four bytes proceeding the nal unit indicates frame length*/
+//        int have_copy = 0;
+//        //编码后，h264数据保存为nal了，我们可以获取到nals[i].type的类型判断是sps还是pps
+//        //或者是否是关键帧，nals[i].i_payload表示数据长度，nals[i].p_payload表示存储的数据
+//        //编码后，我们按照nals[i].i_payload的长度来保存copy h264数据的，然后抛给java端用作
+//        //rtmp发送数据，outFrameSize是变长的，当有sps pps的时候大于1，其它时候值为1
+//        for (int i = 0; i < num_nals; i++) {
+//            outFrameSize[i] = nals[i].i_payload;
+//            memcpy(outBytes + have_copy, nals[i].p_payload, nals[i].i_payload);
+//            have_copy += nals[i].i_payload;
+//        }
+//#ifdef ENCODE_OUT_FILE_1
+//        fwrite(outBytes, 1, frame_size, out1);
+//#endif
+//
+//#ifdef ENCODE_OUT_FILE_2
+//        for (int i = 0; i < frame_size; i++) {
+//            outBytes[i] = (char) nals[0].p_payload[i];
+//        }
+//        fwrite(outBytes, 1, frame_size, out2);
+//        *outFrameSize = frame_size;
+//#endif
 
         return num_nals;
     }
@@ -139,8 +139,8 @@ void Frame_X264::set_x264_params() {
 
     //I帧间隔
     params.i_csp = X264_CSP_I420;
-    params.i_width = getOutWidth();
-    params.i_height = getOutHeight();
+    params.i_width = getInWidth();
+    params.i_height = getInHeight();
 
     //并行编码多帧
     params.i_threads = X264_SYNC_LOOKAHEAD_AUTO;
@@ -201,14 +201,32 @@ bool Frame_X264::validate_settings() {
         LOGE(JNI_DEBUG, "No in_height set");
         return false;
     }
-    if (!out_width) {
-        LOGE(JNI_DEBUG, "No out_width set");
-        return false;
+
+    return true;
+}
+
+
+
+bool Frame_X264::close() {
+    if (encoder) {
+        x264_picture_clean(&pic_in);
+        memset((char*) &pic_in, 0, sizeof(pic_in));
+        memset((char*) &pic_out, 0, sizeof(pic_out));
+
+        x264_encoder_close(encoder);
+        encoder = NULL;
     }
-    if (!out_height) {
-        LOGE(JNI_DEBUG, "No out_height set");
-        return false;
+
+#ifdef ENCODE_OUT_FILE_1
+    if (out1) {
+        fclose(out1);
     }
+#endif
+#ifdef ENCODE_OUT_FILE_2
+    if (out2) {
+        fclose(out2);
+    }
+#endif
 
     return true;
 }

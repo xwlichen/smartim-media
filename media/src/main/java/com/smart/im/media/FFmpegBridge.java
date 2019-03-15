@@ -8,9 +8,9 @@ package com.smart.im.media;
  */
 public class FFmpegBridge {
 
-    static {
-        System.loadLibrary("ffmpeg-jni");
-    }
+//    static {
+//        System.loadLibrary("ffmpeg-jni");
+//    }
 
 
     public static native String test();
