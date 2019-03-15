@@ -33,7 +33,7 @@ public :
 
     int getSampleRateIndex(int sampleRate);
 
-    RTMP *rtmp;
+//    RTMP *rtmp;
 
     RtmpUtils();
 
@@ -50,8 +50,7 @@ public :
     void add_packet(RTMPPacket *rtmpPacket);
 
     void init_thread();
-
-//    static void *push_thread(void * args);
+//     void *push_thread(void * args);
 };
 
 #endif //SMARTIM_MEDIA_RTMP_UTILS_H

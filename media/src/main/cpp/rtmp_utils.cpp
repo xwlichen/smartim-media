@@ -27,7 +27,7 @@ jobject jobject_error;
 
 int is_pushing = FALSE;
 int start_time;
-
+RTMP *rtmp;
 
 RtmpUtils::RtmpUtils() {
 }
@@ -257,9 +257,9 @@ void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
 }
 
 
-void *push_thread(void *args) {
+void* push_thread(void *args) {
     //建立RTMP连接
-    RTMP *rtmp = RTMP_Alloc();
+//    RTMP *rtmp = RTMP_Alloc();
     if (!rtmp) {
         LOGE(JNI_DEBUG, "RTMP_Alloc fail...");
         goto end;

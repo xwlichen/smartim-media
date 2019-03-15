@@ -35,7 +35,6 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
     public void onPreviewFrame(byte[] data, Camera camera) {
 
         if (isPushing) {
-            isPushing=false;
             liveBridge.pushVideoData(data);
         }
 
