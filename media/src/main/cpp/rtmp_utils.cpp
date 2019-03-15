@@ -267,7 +267,7 @@ void* push_thread(void *args) {
     if (!RTMP_Connect(rtmp, NULL)) {
         LOGE(JNI_DEBUG, "RTMP_Connect fail...");
 //        throw_error_to_java(ERROR_RTMP_CONNECT);
-        goto end;
+//        goto end;
     }
     LOGI(JNI_DEBUG, "RTMP_Connect success...");
     if (!RTMP_ConnectStream(rtmp, 0)) {
