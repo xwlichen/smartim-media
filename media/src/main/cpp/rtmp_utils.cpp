@@ -307,7 +307,7 @@ void* push_thread(void *args) {
     //循环推流
     while (is_pushing) {
         pthread_mutex_lock(&mutex);
-        pthread_cond_wait(&cond, &mutex);
+//        pthread_cond_wait(&cond, &mutex);
         //从队头去一个RTMP包出来
         RTMPPacket *packet = (RTMPPacket *)(queue_get_first());
         if (packet) {
