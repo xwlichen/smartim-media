@@ -90,6 +90,7 @@ public:
 
 
     x264_nal_t* get_x264_nal_t();
+    void set_x264_nal_t(x264_nal_t *x264Nal);
 };
 
 

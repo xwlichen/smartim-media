@@ -142,12 +142,13 @@ Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env, jobject ins
 
 
     fts++;
+    frame_x264->set_x264_nal_t(NULL);
     int nal_num = frame_x264->encode_frame(dst_i420_data, fts);
-    rtmpUtils->add_x264_data(frame_x264->get_x264_nal_t(), nal_num);
+    LOGE(JNI_DEBUG,"nal_num : %d",nal_num);
 
-//    if (dst_i420_data != NULL) {
-//        free(dst_i420_data);
-//    }
+    rtmpUtils->add_x264_data(frame_x264->get_x264_nal_t(), nal_num);
+    LOGE(JNI_DEBUG,"add_x264_data");
+
 
     free(dst_i420_data);
     dst_i420_data = NULL;

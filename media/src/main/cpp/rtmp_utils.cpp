@@ -87,6 +87,7 @@ void RtmpUtils::add_x264_data(x264_nal_t *nal, int nal_num) {
     int i = 0;
     //0x00 0x00 0x01）  0x00 0x00 0x00 0x01   都是视频帧（NALU数据单元）之间的间隔标识
     for (; i < nal_num; ++i) {
+        LOGE(JNI_DEBUG,"nal[i].i_type :%d",nal[i].i_type);
         if (nal[i].i_type == NAL_SPS) {//sps
             sps_len = nal[i].i_payload - 4;
             memcpy(sps, nal[i].p_payload + 4, (size_t) sps_len);
@@ -109,6 +110,7 @@ void RtmpUtils::add_x264_data(x264_nal_t *nal, int nal_num) {
 */
 void
 RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, int pps_len) {
+    LOGE(JNI_DEBUG,"add header start");
     //LOGI("#######addSequenceH264Header#########pps_lem=%d, sps_len=%d", pps_len, sps_len);
     RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 1024);
     memset(packet, 0, RTMP_HEAD_SIZE + 1024);
@@ -179,9 +181,12 @@ RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, i
 //        //LOGD("send packet sendSpsAndPps");
 //    }
     free(packet);
+    LOGE(JNI_DEBUG,"add header end");
+
 }
 
 void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
+    LOGE(JNI_DEBUG,"add body start");
     //去掉起始码(界定符)
     if (buf[2] == 0x00) {
         //00 00 00 01
@@ -192,6 +197,14 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
         buf += 3;
         len -= 3;
     }
+
+//    if(buf[2] == 0x01){//00 00 01
+//        buf += 3;
+//        len -= 3;
+//    } else if (buf[3] == 0x01){//00 00 00 01
+//        buf += 4;
+//        len -= 4;
+//    }
     int body_size = len + 9;
     RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 9 + len);
     memset(packet, 0, RTMP_HEAD_SIZE);
@@ -222,9 +235,11 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
     body[6] = (len >> 16) & 0xff;
     body[7] = (len >> 8) & 0xff;
     body[8] = (len) & 0xff;
+    LOGE(JNI_DEBUG,"add body copy before");
 
     /*copy data*/
     memcpy(&body[9], buf, len);
+    LOGE(JNI_DEBUG,"add body copy end");
 
     packet->m_hasAbsTimestamp = 0;
     packet->m_nBodySize = body_size;
@@ -235,8 +250,11 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
     packet->m_nInfoField2 = rtmp->m_stream_id;
     //记录了每一个tag相对于第一个tag（File Header）的相对时间
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
+    LOGE(JNI_DEBUG,"add body packet before");
 
     add_packet(packet);
+    LOGE(JNI_DEBUG,"add body end");
+
 
     //send rtmp h264 body data
 //    if (RTMP_IsConnected(rtmp)) {
@@ -244,6 +262,8 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
 //        //LOGD("send packet sendVideoData");
 //    }
     free(packet);
+    LOGE(JNI_DEBUG,"add body free");
+
 }
 
 
@@ -252,7 +272,8 @@ void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
     if (is_pushing) {
         queue_append_last(rtmpPacket);
     }
-    pthread_cond_signal(&cond);
+//    pthread_cond_signal(&cond);
+//    pthread_cond_wait(&cond,&mutex);
     pthread_mutex_unlock(&mutex);
 }
 
