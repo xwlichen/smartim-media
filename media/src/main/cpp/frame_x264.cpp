@@ -73,14 +73,15 @@ bool Frame_X264::open_x264_Encode() {
 int Frame_X264::encode_frame(char *inBytes, int pts) {
     int *outFrameSize;
     char *outBytes;
+//    LOGE(JNI_DEBUG,"inBytes size: %d"+ sizeof(inBytes))
 //YUV420P数据转化为h264
     int i420_y_size = in_width * in_height;
     int i420_u_size = (in_width >> 1) * (in_height >> 1);
     int i420_v_size = i420_u_size;
 
-    uint8_t *i420_y_data = (uint8_t *) inBytes;
-    uint8_t *i420_u_data = (uint8_t *) inBytes + i420_y_size;
-    uint8_t *i420_v_data = (uint8_t *) inBytes + i420_y_size + i420_u_size;
+    const uint8_t *i420_y_data = (uint8_t *) inBytes;
+    const uint8_t *i420_u_data = (uint8_t *) inBytes + i420_y_size;
+    const uint8_t *i420_v_data = (uint8_t *) inBytes + i420_y_size + i420_u_size;
     //将Y,U,V数据保存到pic_in.img的对应的分量中，还有一种方法是用AV_fillPicture和sws_scale来进行变换
     memcpy(pic_in.img.plane[0], i420_y_data, i420_y_size);
     memcpy(pic_in.img.plane[1], i420_u_data, i420_u_size);
@@ -144,6 +145,8 @@ void Frame_X264::set_x264_params() {
 
     //并行编码多帧
     params.i_threads = X264_SYNC_LOOKAHEAD_AUTO;
+//    params.i_threads = 1;
+
     params.i_fps_num = 25;//getFps();
     params.i_fps_den = 1;
 
@@ -206,12 +209,11 @@ bool Frame_X264::validate_settings() {
 }
 
 
-
 bool Frame_X264::close() {
     if (encoder) {
         x264_picture_clean(&pic_in);
-        memset((char*) &pic_in, 0, sizeof(pic_in));
-        memset((char*) &pic_out, 0, sizeof(pic_out));
+        memset((char *) &pic_in, 0, sizeof(pic_in));
+        memset((char *) &pic_out, 0, sizeof(pic_out));
 
         x264_encoder_close(encoder);
         encoder = NULL;
@@ -320,7 +322,7 @@ void Frame_X264::setBFrameFrq(int frameFrq) {
     b_frame_frq = frameFrq;
 }
 
-x264_nal_t* Frame_X264::get_x264_nal_t() {
+x264_nal_t *Frame_X264::get_x264_nal_t() {
     return nals;
 };
 

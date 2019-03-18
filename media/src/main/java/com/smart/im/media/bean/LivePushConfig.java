@@ -12,8 +12,8 @@ public class LivePushConfig {
 
     private String url;
 
-    private int width = 1920;//分辨率设置很重要
-    private int height = 1080;
+    private int width = 640;//分辨率设置很重要
+    private int height = 480;
     private int bitRate = 1500;//kb/s jason-->480kb
     private int frameRate = 25;//fps
     private int sampleRate = 44100;//采样率：Hz

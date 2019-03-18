@@ -20,7 +20,7 @@ public:
 
     ~ImgUtils();
 
-    void nav21ToI420(jbyte *src_n21_data, jbyte *dst_i420_data, int width, int height);
+    void nav21ToI420(char *src_n21_data, char *dst_i420_data, int width, int height);
 
 
 };

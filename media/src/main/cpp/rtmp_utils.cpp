@@ -264,21 +264,22 @@ void* push_thread(void *args) {
         LOGE(JNI_DEBUG, "RTMP_Alloc fail...");
         goto end;
     }
-    if (!RTMP_Connect(rtmp, NULL)) {
+    if (!RTMP_IsConnected(rtmp)) {
         LOGE(JNI_DEBUG, "RTMP_Connect fail...");
+        RTMP_Connect(rtmp,NULL);
 //        throw_error_to_java(ERROR_RTMP_CONNECT);
 //        goto end;
     }
     LOGI(JNI_DEBUG, "RTMP_Connect success...");
-    if (!RTMP_ConnectStream(rtmp, 0)) {
-        LOGE(JNI_DEBUG, "RTMP_ConnectStream fail...");
+//    if (!RTMP_IConnectStream(rtmp, 0)) {
+//        LOGE(JNI_DEBUG, "RTMP_ConnectStream fail...");
 //        throw_error_to_java(ERROR_RTMP_CONNECT_STREAM);
-        goto end;
-    }
+//        goto end;
+//    }
     LOGI(JNI_DEBUG, "RTMP_ConnectStream success...");
 
     //开始计时
-    start_time = RTMP_GetTime();
+//    start_time = RTMP_GetTime();
     is_pushing = TRUE;
     //发送一个ACC HEADER
 //    add_aac_header();
@@ -287,7 +288,7 @@ void* push_thread(void *args) {
         pthread_mutex_lock(&mutex);
         pthread_cond_wait(&cond, &mutex);
         //从队头去一个RTMP包出来
-        RTMPPacket *packet = static_cast<RTMPPacket *>(queue_get_first());
+        RTMPPacket *packet = (RTMPPacket *)(queue_get_first());
         if (packet) {
             queue_delete_first();
             //发送rtmp包，true代表rtmp内部有缓存
@@ -299,14 +300,14 @@ void* push_thread(void *args) {
 //                throw_error_to_java(ERROR_RTMP_SEND_PACKAT);
                 goto end;
             }
-            RTMPPacket_Free(packet);
+//            RTMPPacket_Free(packet);
         }
         pthread_mutex_unlock(&mutex);
     }
     end:
     LOGI(JNI_DEBUG, "free all the thing about rtmp...");
-    RTMP_Close(rtmp);
-    free(rtmp);
+//    RTMP_Close(rtmp);
+//    free(rtmp);
     return 0;
 }
 

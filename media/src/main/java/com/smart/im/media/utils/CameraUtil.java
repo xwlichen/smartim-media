@@ -26,8 +26,8 @@ public class CameraUtil {
     private boolean isStartPreview; //是否已经开始预览了
 
     private int rotation; //摄像头旋转角度
-    private int preWidth = 1920; //
-    private int preHeight = 1080;
+    private int preWidth = 640; //
+    private int preHeight = 480;
     private int currentType = Camera.CameraInfo.CAMERA_FACING_BACK; //摄像头的的前后置
 
 

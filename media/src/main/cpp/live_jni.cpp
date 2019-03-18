@@ -111,8 +111,9 @@ Java_com_smart_im_media_bridge_LiveBridge_initRtmp(JNIEnv *env, jobject instance
 
     rtmpUtils = new RtmpUtils();
     rtmpUtils->init((unsigned char *) url);
+    rtmpUtils->init_thread();
 
-    imgUtils=new ImgUtils();
+    imgUtils = new ImgUtils();
 
     // TODO
 
@@ -121,23 +122,37 @@ Java_com_smart_im_media_bridge_LiveBridge_initRtmp(JNIEnv *env, jobject instance
 
 
 int fts = 0;
-char *dst_h264_data;
+//char *dst_i420_data = (char *) malloc(
+//        sizeof(char) * 640 * 480 * 3 / 2);
+
 
 JNIEXPORT void JNICALL
 Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env, jobject instance,
                                                         jbyteArray data_) {
 
     jbyte *data = env->GetByteArrayElements(data_, NULL);
-    jbyte *dst_i420_data= (jbyte *) malloc(sizeof(jbyte) * frame_x264->getInWidth() * frame_x264->getInHeight() * 3 / 2);
-    rtmpUtils->init_thread();
 
-    imgUtils->nav21ToI420(data, dst_i420_data, frame_x264->getInWidth(), frame_x264->getInHeight());
+//    int size = env->GetArrayLength(dst_i420_data);
+//    if (size <= 0) {
+    char *dst_i420_data = (char *) malloc(
+            sizeof(char) * frame_x264->getInWidth() * frame_x264->getInHeight() * 3 / 2);
+//    }
+    imgUtils->nav21ToI420((char *)data, dst_i420_data, frame_x264->getInWidth(), frame_x264->getInHeight());
+
+
+
     fts++;
-    int nal_num = frame_x264->encode_frame((char *)dst_i420_data, fts);
+    int nal_num = frame_x264->encode_frame(dst_i420_data, fts);
     rtmpUtils->add_x264_data(frame_x264->get_x264_nal_t(), nal_num);
 
+//    if (dst_i420_data != NULL) {
+//        free(dst_i420_data);
+//    }
 
+    free(dst_i420_data);
+    dst_i420_data = NULL;
     env->ReleaseByteArrayElements(data_, data, 0);
+
 }
 
 
