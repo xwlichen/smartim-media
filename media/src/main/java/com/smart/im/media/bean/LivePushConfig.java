@@ -16,10 +16,12 @@ public class LivePushConfig {
     private int height = 480;
     private int bitRate = 1500;//kb/s jason-->480kb
     private int frameRate = 25;//fps
+
     private int sampleRate = 44100;//采样率：Hz
+    private int numChannels = 2;//声道数
+    private int audioBitRate=64000;
     private int channelConfig = AudioFormat.CHANNEL_IN_STEREO;//立体声道
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;//pcm16位
-    private int numChannels = 2;//声道数
 
     public LivePushConfig() {
     }
@@ -83,6 +85,22 @@ public class LivePushConfig {
         this.sampleRate = sampleRate;
     }
 
+    public int getNumChannels() {
+        return numChannels;
+    }
+
+    public void setNumChannels(int numChannels) {
+        this.numChannels = numChannels;
+    }
+
+    public int getAudioBitRate() {
+        return audioBitRate;
+    }
+
+    public void setAudioBitRate(int audioBitRate) {
+        this.audioBitRate = audioBitRate;
+    }
+
     public int getChannelConfig() {
         return channelConfig;
     }
@@ -97,28 +115,5 @@ public class LivePushConfig {
 
     public void setAudioFormat(int audioFormat) {
         this.audioFormat = audioFormat;
-    }
-
-    public int getNumChannels() {
-        return numChannels;
-    }
-
-    public void setNumChannels(int numChannels) {
-        this.numChannels = numChannels;
-    }
-
-
-    @Override
-    public String toString() {
-        return "LivePushConfig{" +
-                "width=" + width +
-                ", height=" + height +
-                ", bitRate=" + bitRate +
-                ", frameRate=" + frameRate +
-                ", sampleRate=" + sampleRate +
-                ", channelConfig=" + channelConfig +
-                ", audioFormat=" + audioFormat +
-                ", numChannels=" + numChannels +
-                '}';
     }
 }

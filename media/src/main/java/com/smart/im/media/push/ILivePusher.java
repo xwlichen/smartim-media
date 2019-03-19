@@ -17,11 +17,6 @@ public interface  ILivePusher {
 
     void destroy();
 
-    void startPreview(SurfaceView surfaceView);
-
-    void startPreviewAysnc(SurfaceView surfaceView);
-
-    void stopPreview();
 
     void startPush();
 

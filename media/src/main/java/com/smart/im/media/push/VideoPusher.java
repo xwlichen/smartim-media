@@ -26,17 +26,13 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
     private CameraUtil cameraUtil;
     private LiveBridge liveBridge;
 
-    //阻塞线程安全队列，生产者和消费者
-    private LinkedBlockingQueue<byte[]> mQueue = new LinkedBlockingQueue<>();
+
 
 
     public VideoPusher(LiveBridge liveBridge) {
         this.liveBridge = liveBridge;
         cameraUtil = new CameraUtil();
 
-        initWorkThread();
-        loop = true;
-        workThread.start();
     }
 
 
@@ -84,7 +80,6 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
 
     }
 
-    @Override
     public void startPreview(SurfaceView surfaceView) {
         this.surfaceView = surfaceView;
         cameraUtil.setContext(surfaceView.getContext());
@@ -93,12 +88,11 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
         surfaceView.getHolder().addCallback(this);
     }
 
-    @Override
+
     public void startPreviewAysnc(SurfaceView surfaceView) {
 
     }
 
-    @Override
     public void stopPreview() {
 
     }
@@ -136,28 +130,6 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
     }
 
 
-    private Thread workThread;
-    private boolean loop;
-
-    private void initWorkThread() {
-        workThread = new Thread() {
-            @Override
-            public void run() {
-                while (isPushing && !Thread.interrupted()) {
-                    try {
-                        //获取阻塞队列中的数据，没有数据的时候阻塞
-                        byte[] srcData = mQueue.take();
-                        if (srcData != null&&srcData.length>0) {
-                            liveBridge.pushVideoData(srcData);
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-            }
-        };
-    }
 
 
 }

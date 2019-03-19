@@ -251,6 +251,113 @@ void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
 }
 
 
+/**
+ * 发送AAC Sequence HEAD 头数据
+ * @param sampleRate
+ * @param channel
+ * @param timestamp
+ */
+void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
+    int body_size = 2 + 2;
+    RTMPPacket *packet = (RTMPPacket *)malloc(RTMP_HEAD_SIZE + 4);
+    memset(packet,0,RTMP_HEAD_SIZE);
+
+    packet->m_body = (char *)packet + RTMP_HEAD_SIZE;
+    unsigned char * body = (unsigned char *)packet->m_body;
+    //头信息配置
+    /*AF 00 + AAC RAW data*/
+    body[0] = 0xAF;
+    //AACPacketType:0表示AAC sequence header
+    body[1] = 0x00;
+
+    //5bit audioObjectType 编码结构类型，AAC-LC为2 二进制位00010
+    //4bit samplingFrequencyIndex 音频采样索引值，44100对应值是4，二进制位0100
+    //4bit channelConfiguration 音频输出声道，对应的值是2，二进制位0010
+    //1bit frameLengthFlag 标志位用于表明IMDCT窗口长度 0 二进制位0
+    //1bit dependsOnCoreCoder 标志位，表面是否依赖与corecoder 0 二进制位0
+    //1bit extensionFlag 选择了AAC-LC,这里必须是0 二进制位0
+    //上面都合成二进制0001001000010000
+    uint16_t audioConfig = 0 ;
+    //这里的2表示对应的是AAC-LC 由于是5个bit，左移11位，变为16bit，2个字节
+    //与上一个1111100000000000(0xF800)，即只保留前5个bit
+    audioConfig |= ((2 << 11) & 0xF800) ;
+
+    int sampleRateIndex = getSampleRateIndex( sampleRate ) ;
+    if( -1 == sampleRateIndex ) {
+        free(packet);
+        packet = NULL;
+        LOGE(JNI_DEBUG,"addSequenceAacHeader: no support current sampleRate[%d]" , sampleRate);
+        return;
+    }
+
+    //sampleRateIndex为4，二进制位0000001000000000 & 0000011110000000(0x0780)（只保留5bit后4位）
+    audioConfig |= ((sampleRateIndex << 7) & 0x0780) ;
+    //sampleRateIndex为4，二进制位000000000000000 & 0000000001111000(0x78)（只保留5+4后4位）
+    audioConfig |= ((channel << 3) & 0x78) ;
+    //最后三个bit都为0保留最后三位111(0x07)
+    audioConfig |= (0 & 0x07) ;
+    //最后得到合成后的数据0001001000010000，然后分别取这两个字节
+
+    body[2] = ( audioConfig >> 8 ) & 0xFF ;
+    body[3] = ( audioConfig & 0xFF );
+
+    //参数设置
+    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
+    packet->m_nBodySize = body_size;
+    packet->m_nChannel = 0x04;
+    packet->m_hasAbsTimestamp = 0;
+    packet->m_nTimeStamp = 0;
+    packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
+    packet->m_nInfoField2 = rtmp->m_stream_id;
+
+    //send rtmp aac head
+    if (RTMP_IsConnected(rtmp)) {
+        RTMP_SendPacket(rtmp, packet, TRUE);
+        //LOGD("send packet sendAacSpec");
+    }
+    free(packet);
+}
+
+/**
+ * 发送rtmp AAC data
+ * @param buf
+ * @param len
+ * @param timeStamp
+ */
+void RtmpUtils::add_acc_body(unsigned char *buf, int len, long timeStamp) {
+    int body_size = 2 + len;
+    RTMPPacket * packet = (RTMPPacket *)malloc(RTMP_HEAD_SIZE + len + 2);
+    memset(packet, 0, RTMP_HEAD_SIZE);
+
+    packet->m_body = (char *)packet + RTMP_HEAD_SIZE;
+    unsigned char * body = (unsigned char *)packet->m_body;
+
+    //头信息配置
+    /*AF 00 + AAC RAW data*/
+    body[0] = 0xAF;
+    //AACPacketType:1表示AAC raw
+    body[1] = 0x01;
+    /*spec_buf是AAC raw数据*/
+    memcpy(&body[2], buf, len);
+    packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
+    packet->m_nBodySize = body_size;
+    packet->m_nChannel = 0x04;
+    packet->m_hasAbsTimestamp = 0;
+    packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+    packet->m_nTimeStamp = RTMP_GetTime() - start_time;
+    //LOGI("aac m_nTimeStamp = %d", packet->m_nTimeStamp);
+    packet->m_nInfoField2 = rtmp->m_stream_id;
+
+    //send rtmp aac data
+    if (RTMP_IsConnected(rtmp)) {
+        RTMP_SendPacket(rtmp, packet, TRUE);
+        //LOGD("send packet sendAccBody");
+    }
+    free(packet);
+}
+
+
+
 void* push_thread(void *args) {
     if (!rtmp) {
         LOGE(JNI_DEBUG, "RTMP_Alloc fail...");

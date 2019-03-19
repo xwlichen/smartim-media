@@ -34,7 +34,7 @@ public class SmartLivePusher implements ILivePusher {
 
         liveBridge = new LiveBridge();
         videoPusher = new VideoPusher(liveBridge);
-        audioPusher = new AudioPusher();
+        audioPusher = new AudioPusher(liveBridge);
 
         liveBridge.initLivePushConfig(config);
     }
@@ -44,17 +44,14 @@ public class SmartLivePusher implements ILivePusher {
 
     }
 
-    @Override
     public void startPreview(SurfaceView surfaceView) {
         videoPusher.startPreview(surfaceView);
     }
 
-    @Override
     public void startPreviewAysnc(SurfaceView surfaceView) {
 
     }
 
-    @Override
     public void stopPreview() {
 
     }
@@ -63,6 +60,7 @@ public class SmartLivePusher implements ILivePusher {
     public void startPush() {
         liveBridge.initRtmp(config.getUrl());
         videoPusher.startPush();
+        audioPusher.startPush();
 
     }
 

@@ -48,6 +48,12 @@ public :
 
     void add_x264_body(uint8_t *buf, int len);
 
+    void add_acc_header(int sampleRate, int channel, int timestamp );
+
+    void add_acc_body(unsigned char *buf, int len, long timeStamp);
+
+
+
     void add_packet(RTMPPacket *rtmpPacket);
 
     void init_thread();
