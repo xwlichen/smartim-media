@@ -131,12 +131,8 @@ Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env, jobject ins
                                                         jbyteArray data_) {
 
     jbyte *data = env->GetByteArrayElements(data_, NULL);
-
-//    int size = env->GetArrayLength(dst_i420_data);
-//    if (size <= 0) {
     char *dst_i420_data = (char *) malloc(
             sizeof(char) * frame_x264->getInWidth() * frame_x264->getInHeight() * 3 / 2);
-//    }
     imgUtils->nav21ToI420((char *)data, dst_i420_data, frame_x264->getInWidth(), frame_x264->getInHeight());
 
 

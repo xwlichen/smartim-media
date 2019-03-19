@@ -316,8 +316,6 @@ void RtmpUtils::init_thread() {
     pthread_t push_thread_id;
     //创建消费线程推流
     pthread_create(&push_thread_id, NULL, push_thread, this);
-
-//    std::ref(threadsafe_queue);
 }
 
 
