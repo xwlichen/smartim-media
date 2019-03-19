@@ -250,6 +250,17 @@ void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
 
 }
 
+int RtmpUtils::getSampleRateIndex(int sampleRate) {
+    int sampleRateArray[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350};
+    int i = 0;
+    for( ; i < 13 ; ++i ) {
+        if (sampleRateArray[i] == sampleRate) {
+            return i;
+        }
+    }
+    return -1 ;
+}
+
 
 /**
  * 发送AAC Sequence HEAD 头数据

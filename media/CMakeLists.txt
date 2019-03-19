@@ -42,6 +42,7 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         src/main/cpp/live_jni.cpp
         src/main/cpp/frame_x264.cpp
+        src/main/cpp/audio_acc.cpp
         src/main/cpp/log.cpp
         src/main/cpp/img_utils.cpp
         src/main/cpp/rtmp_utils.cpp

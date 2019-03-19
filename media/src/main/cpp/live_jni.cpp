@@ -135,11 +135,18 @@ JNIEXPORT void JNICALL
 Java_com_smart_im_media_bridge_LiveBridge_pushAudioData(JNIEnv *env, jobject instance,
                                                         jbyteArray data_) {
     jbyte *data = env->GetByteArrayElements(data_, NULL);
-    unsigned char *dst_audio_data = (unsigned char *)malloc(1024);
-    audio_valid_size=audio_acc->encodeAudio((unsigned char*)data,audio_buffer_size,dst_audio_data,1024);
+    unsigned char *dst_acc_data = (unsigned char *)malloc(1024);
+    audio_valid_size=audio_acc->encodeAudio((unsigned char*)data,audio_buffer_size,dst_acc_data,1024);
 
-    video_fts++;
-    rtmp_tils->add_audio_spec()
+    audio_fts++;
+    if (!first_spec){
+        rtmp_tils->add_acc_header(44100,2,0);
+        first_spec= true;
+    }
+    rtmp_tils->add_acc_body(dst_acc_data,audio_valid_size,audio_fts);
+
+    free(dst_acc_data);
+    dst_acc_data=NULL;
 
     env->ReleaseByteArrayElements(data_, data, 0);
 }
