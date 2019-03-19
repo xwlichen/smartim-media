@@ -34,7 +34,7 @@ public class SmartLivePusher implements ILivePusher {
 
         liveBridge = new LiveBridge();
         videoPusher = new VideoPusher(liveBridge);
-        audioPusher = new AudioPusher(liveBridge);
+//        audioPusher = new AudioPusher(liveBridge);
 
         liveBridge.initLivePushConfig(config);
     }

@@ -10,10 +10,13 @@
 #include <jni.h>
 #include <stdint.h>
 #include <malloc.h>
+//#include <stdio.h>
 
 extern "C" {
 #include "queue.h"
 }
+
+using namespace std;
 
 #define RTMP_HEAD_SIZE   (sizeof(RTMPPacket) + RTMP_MAX_HEADER_SIZE)
 
@@ -28,7 +31,7 @@ jobject jobject_error;
 int is_pushing = FALSE;
 int start_time;
 RTMP *rtmp;
-threadsafe_queue<RTMPPacket*> frame_queue;
+threadsafe_queue<RTMPPacket *> frame_queue;
 
 RtmpUtils::RtmpUtils() {
 }
@@ -245,22 +248,23 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
 
 
 void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
-    LOGE(JNI_DEBUG,"add_packet before")
+    LOGE(JNI_DEBUG, "add_packet before")
     frame_queue.push(rtmpPacket);
-    LOGE(JNI_DEBUG,"add_packet after")
+    LOGE(JNI_DEBUG, "add_packet after")
 
 
 }
 
 int RtmpUtils::getSampleRateIndex(int sampleRate) {
-    int sampleRateArray[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000, 7350};
+    int sampleRateArray[] = {96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000, 12000,
+                             11025, 8000, 7350};
     int i = 0;
-    for( ; i < 13 ; ++i ) {
+    for (; i < 13; ++i) {
         if (sampleRateArray[i] == sampleRate) {
             return i;
         }
     }
-    return -1 ;
+    return -1;
 }
 
 
@@ -272,11 +276,11 @@ int RtmpUtils::getSampleRateIndex(int sampleRate) {
  */
 void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
     int body_size = 2 + 2;
-    RTMPPacket *packet = (RTMPPacket *)malloc(RTMP_HEAD_SIZE + 4);
-    memset(packet,0,RTMP_HEAD_SIZE);
+    RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 4);
+    memset(packet, 0, RTMP_HEAD_SIZE);
 
-    packet->m_body = (char *)packet + RTMP_HEAD_SIZE;
-    unsigned char * body = (unsigned char *)packet->m_body;
+    packet->m_body = (char *) packet + RTMP_HEAD_SIZE;
+    unsigned char *body = (unsigned char *) packet->m_body;
     //头信息配置
     /*AF 00 + AAC RAW data*/
     body[0] = 0xAF;
@@ -290,29 +294,29 @@ void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
     //1bit dependsOnCoreCoder 标志位，表面是否依赖与corecoder 0 二进制位0
     //1bit extensionFlag 选择了AAC-LC,这里必须是0 二进制位0
     //上面都合成二进制0001001000010000
-    uint16_t audioConfig = 0 ;
+    uint16_t audioConfig = 0;
     //这里的2表示对应的是AAC-LC 由于是5个bit，左移11位，变为16bit，2个字节
     //与上一个1111100000000000(0xF800)，即只保留前5个bit
-    audioConfig |= ((2 << 11) & 0xF800) ;
+    audioConfig |= ((2 << 11) & 0xF800);
 
-    int sampleRateIndex = getSampleRateIndex( sampleRate ) ;
-    if( -1 == sampleRateIndex ) {
+    int sampleRateIndex = getSampleRateIndex(sampleRate);
+    if (-1 == sampleRateIndex) {
         free(packet);
         packet = NULL;
-        LOGE(JNI_DEBUG,"addSequenceAacHeader: no support current sampleRate[%d]" , sampleRate);
+        LOGE(JNI_DEBUG, "addSequenceAacHeader: no support current sampleRate[%d]", sampleRate);
         return;
     }
 
     //sampleRateIndex为4，二进制位0000001000000000 & 0000011110000000(0x0780)（只保留5bit后4位）
-    audioConfig |= ((sampleRateIndex << 7) & 0x0780) ;
+    audioConfig |= ((sampleRateIndex << 7) & 0x0780);
     //sampleRateIndex为4，二进制位000000000000000 & 0000000001111000(0x78)（只保留5+4后4位）
-    audioConfig |= ((channel << 3) & 0x78) ;
+    audioConfig |= ((channel << 3) & 0x78);
     //最后三个bit都为0保留最后三位111(0x07)
-    audioConfig |= (0 & 0x07) ;
+    audioConfig |= (0 & 0x07);
     //最后得到合成后的数据0001001000010000，然后分别取这两个字节
 
-    body[2] = ( audioConfig >> 8 ) & 0xFF ;
-    body[3] = ( audioConfig & 0xFF );
+    body[2] = (audioConfig >> 8) & 0xFF;
+    body[3] = (audioConfig & 0xFF);
 
     //参数设置
     packet->m_packetType = RTMP_PACKET_TYPE_AUDIO;
@@ -339,11 +343,11 @@ void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
  */
 void RtmpUtils::add_acc_body(unsigned char *buf, int len, long timeStamp) {
     int body_size = 2 + len;
-    RTMPPacket * packet = (RTMPPacket *)malloc(RTMP_HEAD_SIZE + len + 2);
+    RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + len + 2);
     memset(packet, 0, RTMP_HEAD_SIZE);
 
-    packet->m_body = (char *)packet + RTMP_HEAD_SIZE;
-    unsigned char * body = (unsigned char *)packet->m_body;
+    packet->m_body = (char *) packet + RTMP_HEAD_SIZE;
+    unsigned char *body = (unsigned char *) packet->m_body;
 
     //头信息配置
     /*AF 00 + AAC RAW data*/
@@ -370,53 +374,60 @@ void RtmpUtils::add_acc_body(unsigned char *buf, int len, long timeStamp) {
 }
 
 
-
-void* push_thread(void *args) {
-    if (!rtmp) {
-        LOGE(JNI_DEBUG, "RTMP_Alloc fail...");
+void *push_thread(void *args) {
+    try {
+        if (!rtmp) {
+            LOGE(JNI_DEBUG, "RTMP_Alloc fail...");
 //        goto end;
-    }
-    if (!RTMP_IsConnected(rtmp)) {
-        LOGE(JNI_DEBUG, "RTMP_Connect fail...");
-        RTMP_Connect(rtmp,NULL);
+        }
+        if (!RTMP_IsConnected(rtmp)) {
+            LOGE(JNI_DEBUG, "RTMP_Connect fail...");
+            RTMP_Connect(rtmp, NULL);
 //        throw_error_to_java(ERROR_RTMP_CONNECT);
 //        goto end;
-    }
-    LOGI(JNI_DEBUG, "RTMP_Connect success...");
-    if (!RTMP_ConnectStream(rtmp, 0)) {
-        LOGE(JNI_DEBUG, "RTMP_ConnectStream fail...");
-        goto end;
-    }
-    LOGI(JNI_DEBUG, "RTMP_ConnectStream success...");
-
-    is_pushing = TRUE;
-    //发送一个ACC HEADER
-//    add_aac_header();
-    //循环推流
-    while (is_pushing) {
-        if (frame_queue.empty()) {
-            continue;
         }
+        LOGI(JNI_DEBUG, "RTMP_Connect success...");
+        if (!RTMP_ConnectStream(rtmp, 0)) {
+            LOGE(JNI_DEBUG, "RTMP_ConnectStream fail...");
+            goto end;
+        }
+        LOGI(JNI_DEBUG, "RTMP_ConnectStream success...");
+
+        is_pushing = TRUE;
+        //发送一个ACC HEADER
+//    add_aac_header();
+        //循环推流
+        while (is_pushing) {
+            if (frame_queue.empty()) {
+                continue;
+            }
 //        RTMPPacket *packet = (RTMPPacket *)(frame_queue.wait_and_pop().get());
-        RTMPPacket *packet;
-        frame_queue.wait_and_pop(packet);
+            RTMPPacket *packet;
+            frame_queue.wait_and_pop(packet);
 
-        if (packet) {
-            LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d",packet->m_nTimeStamp);
+            if (packet) {
+                LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
 
-            //发送rtmp包，true代表rtmp内部有缓存
-            int ret = RTMP_SendPacket(rtmp, packet, TRUE);
-            LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d",ret);
+                //发送rtmp包，true代表rtmp内部有缓存
+                int ret;
 
-            if (!ret) {
-                LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
-                RTMPPacket_Free(packet);
-                goto end;
+                ret = RTMP_SendPacket(rtmp, packet, TRUE);
+
+
+                LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
+
+                if (!ret) {
+                    LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
+                    RTMPPacket_Free(packet);
+                    goto end;
+                }
             }
         }
+        end:
+        LOGI(JNI_DEBUG, "free all the thing about rtmp...");
+    } catch (runtime_error er) {
+        LOGI(JNI_DEBUG, "exception : %s", er.what())
     }
-    end:
-    LOGI(JNI_DEBUG, "free all the thing about rtmp...");
 //    RTMP_Close(rtmp);
 //    free(rtmp);
     return 0;
