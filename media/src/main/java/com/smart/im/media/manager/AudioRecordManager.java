@@ -37,6 +37,7 @@ public class AudioRecordManager {
     private AudioDataListener audioDataListener;
 
     public AudioRecordManager() {
+        bufferSizeInBytes = AudioRecord.getMinBufferSize(SAMPLE_HZ, CHANNEL_CONFIG, FORMAT);
         audioRecord = new AudioRecord(SOURCE, SAMPLE_HZ, CHANNEL_CONFIG, FORMAT, bufferSizeInBytes);
         bufferSize = 4 * 1024;
     }

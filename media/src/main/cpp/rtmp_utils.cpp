@@ -245,8 +245,10 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
 
 
 void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
-
+    LOGE(JNI_DEBUG,"add_packet before")
     frame_queue.push(rtmpPacket);
+    LOGE(JNI_DEBUG,"add_packet after")
+
 
 }
 

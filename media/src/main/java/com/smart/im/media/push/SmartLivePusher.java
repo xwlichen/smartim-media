@@ -60,7 +60,7 @@ public class SmartLivePusher implements ILivePusher {
     public void startPush() {
         liveBridge.initRtmp(config.getUrl());
         videoPusher.startPush();
-        audioPusher.startPush();
+//        audioPusher.startPush();
 
     }
 
