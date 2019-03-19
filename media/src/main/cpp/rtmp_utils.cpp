@@ -28,6 +28,7 @@ jobject jobject_error;
 int is_pushing = FALSE;
 int start_time;
 RTMP *rtmp;
+threadsafe_queue<RTMPPacket*> frame_queue;
 
 RtmpUtils::RtmpUtils() {
 }
@@ -87,7 +88,6 @@ void RtmpUtils::add_x264_data(x264_nal_t *nal, int nal_num) {
     int i = 0;
     //0x00 0x00 0x01）  0x00 0x00 0x00 0x01   都是视频帧（NALU数据单元）之间的间隔标识
     for (; i < nal_num; ++i) {
-        LOGE(JNI_DEBUG,"nal[i].i_type :%d",nal[i].i_type);
         if (nal[i].i_type == NAL_SPS) {//sps
             sps_len = nal[i].i_payload - 4;
             memcpy(sps, nal[i].p_payload + 4, (size_t) sps_len);
@@ -110,7 +110,6 @@ void RtmpUtils::add_x264_data(x264_nal_t *nal, int nal_num) {
 */
 void
 RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, int pps_len) {
-    LOGE(JNI_DEBUG,"add header start");
     //LOGI("#######addSequenceH264Header#########pps_lem=%d, sps_len=%d", pps_len, sps_len);
     RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 1024);
     memset(packet, 0, RTMP_HEAD_SIZE + 1024);
@@ -175,18 +174,12 @@ RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, i
     packet->m_nInfoField2 = rtmp->m_stream_id;
 
     add_packet(packet);
-    //send rtmp
-//    if (RTMP_IsConnected(rtmp)) {
-//        RTMP_SendPacket(rtmp, packet, TRUE);
-//        //LOGD("send packet sendSpsAndPps");
-//    }
+
     free(packet);
-    LOGE(JNI_DEBUG,"add header end");
 
 }
 
 void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
-    LOGE(JNI_DEBUG,"add body start");
     //去掉起始码(界定符)
     if (buf[2] == 0x00) {
         //00 00 00 01
@@ -198,13 +191,7 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
         len -= 3;
     }
 
-//    if(buf[2] == 0x01){//00 00 01
-//        buf += 3;
-//        len -= 3;
-//    } else if (buf[3] == 0x01){//00 00 00 01
-//        buf += 4;
-//        len -= 4;
-//    }
+
     int body_size = len + 9;
     RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 9 + len);
     memset(packet, 0, RTMP_HEAD_SIZE);
@@ -235,11 +222,9 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
     body[6] = (len >> 16) & 0xff;
     body[7] = (len >> 8) & 0xff;
     body[8] = (len) & 0xff;
-    LOGE(JNI_DEBUG,"add body copy before");
 
     /*copy data*/
     memcpy(&body[9], buf, len);
-    LOGE(JNI_DEBUG,"add body copy end");
 
     packet->m_hasAbsTimestamp = 0;
     packet->m_nBodySize = body_size;
@@ -250,40 +235,26 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
     packet->m_nInfoField2 = rtmp->m_stream_id;
     //记录了每一个tag相对于第一个tag（File Header）的相对时间
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
-    LOGE(JNI_DEBUG,"add body packet before");
+
 
     add_packet(packet);
-    LOGE(JNI_DEBUG,"add body end");
 
-
-    //send rtmp h264 body data
-//    if (RTMP_IsConnected(rtmp)) {
-//        RTMP_SendPacket(rtmp, packet, TRUE);
-//        //LOGD("send packet sendVideoData");
-//    }
     free(packet);
-    LOGE(JNI_DEBUG,"add body free");
 
 }
 
 
 void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
-    pthread_mutex_lock(&mutex);
-    if (is_pushing) {
-        queue_append_last(rtmpPacket);
-    }
-//    pthread_cond_signal(&cond);
-//    pthread_cond_wait(&cond,&mutex);
-    pthread_mutex_unlock(&mutex);
+
+    frame_queue.push(rtmpPacket);
+
 }
 
 
 void* push_thread(void *args) {
-    //建立RTMP连接
-//    RTMP *rtmp = RTMP_Alloc();
     if (!rtmp) {
         LOGE(JNI_DEBUG, "RTMP_Alloc fail...");
-        goto end;
+//        goto end;
     }
     if (!RTMP_IsConnected(rtmp)) {
         LOGE(JNI_DEBUG, "RTMP_Connect fail...");
@@ -292,38 +263,37 @@ void* push_thread(void *args) {
 //        goto end;
     }
     LOGI(JNI_DEBUG, "RTMP_Connect success...");
-//    if (!RTMP_IConnectStream(rtmp, 0)) {
-//        LOGE(JNI_DEBUG, "RTMP_ConnectStream fail...");
-//        throw_error_to_java(ERROR_RTMP_CONNECT_STREAM);
-//        goto end;
-//    }
+    if (!RTMP_ConnectStream(rtmp, 0)) {
+        LOGE(JNI_DEBUG, "RTMP_ConnectStream fail...");
+        goto end;
+    }
     LOGI(JNI_DEBUG, "RTMP_ConnectStream success...");
 
-    //开始计时
-//    start_time = RTMP_GetTime();
     is_pushing = TRUE;
     //发送一个ACC HEADER
 //    add_aac_header();
     //循环推流
     while (is_pushing) {
-        pthread_mutex_lock(&mutex);
-//        pthread_cond_wait(&cond, &mutex);
-        //从队头去一个RTMP包出来
-        RTMPPacket *packet = (RTMPPacket *)(queue_get_first());
+        if (frame_queue.empty()) {
+            continue;
+        }
+//        RTMPPacket *packet = (RTMPPacket *)(frame_queue.wait_and_pop().get());
+        RTMPPacket *packet;
+        frame_queue.wait_and_pop(packet);
+
         if (packet) {
-            queue_delete_first();
+            LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d",packet->m_nTimeStamp);
+
             //发送rtmp包，true代表rtmp内部有缓存
             int ret = RTMP_SendPacket(rtmp, packet, TRUE);
+            LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d",ret);
+
             if (!ret) {
                 LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
                 RTMPPacket_Free(packet);
-                pthread_mutex_unlock(&mutex);
-//                throw_error_to_java(ERROR_RTMP_SEND_PACKAT);
                 goto end;
             }
-//            RTMPPacket_Free(packet);
         }
-        pthread_mutex_unlock(&mutex);
     }
     end:
     LOGI(JNI_DEBUG, "free all the thing about rtmp...");
@@ -334,14 +304,20 @@ void* push_thread(void *args) {
 
 void RtmpUtils::init_thread() {
 
-    //创建队列
-    create_queue();
-    //初始化互斥锁和条件变量
-    pthread_mutex_init(&mutex, NULL);
-    pthread_cond_init(&cond, NULL);
+//    //创建队列
+//    create_queue();
+//    //初始化互斥锁和条件变量
+//    pthread_mutex_init(&mutex, NULL);
+//    pthread_cond_init(&cond, NULL);
+//    pthread_t push_thread_id;
+//    //创建消费线程推流
+//    pthread_create(&push_thread_id, NULL, push_thread, NULL);
+
     pthread_t push_thread_id;
     //创建消费线程推流
-    pthread_create(&push_thread_id, NULL, push_thread, NULL);
+    pthread_create(&push_thread_id, NULL, push_thread, this);
+
+//    std::ref(threadsafe_queue);
 }
 
 

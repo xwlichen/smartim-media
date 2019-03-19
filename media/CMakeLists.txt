@@ -46,6 +46,8 @@ add_library( # Sets the name of the library.
         src/main/cpp/img_utils.cpp
         src/main/cpp/rtmp_utils.cpp
         src/main/cpp/queue.c
+        src/main/cpp/thread_safe_queue.cpp
+
         )
 
 # 编解码(最重要的库)

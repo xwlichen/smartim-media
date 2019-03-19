@@ -13,6 +13,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <malloc.h>
+#include "thread_safe_queue.cpp"
 
 extern "C" {
 #include <libavutil/pixfmt.h>

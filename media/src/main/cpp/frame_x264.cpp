@@ -85,9 +85,7 @@ int Frame_X264::encode_frame(char *inBytes, int pts) {
     //将Y,U,V数据保存到pic_in.img的对应的分量中，还有一种方法是用AV_fillPicture和sws_scale来进行变换
     memcpy(pic_in.img.plane[0], i420_y_data, i420_y_size);
     memcpy(pic_in.img.plane[1], i420_u_data, i420_u_size);
-    LOGE(JNI_DEBUG,"u data copy")
     memcpy(pic_in.img.plane[2], i420_v_data, i420_v_size);
-    LOGE(JNI_DEBUG,"v data copy")
 
 
     // and encode and store into pic_out
