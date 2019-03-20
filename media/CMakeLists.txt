@@ -49,11 +49,18 @@ add_library( # Sets the name of the library.
         src/main/cpp/queue.c
         src/main/cpp/thread_safe_queue.cpp
 
-        src/main/jniLibs/include/librtmp/amf.c
-        src/main/jniLibs/include/librtmp/hashswf.c
-        src/main/jniLibs/include/librtmp/log.c
-        src/main/jniLibs/include/librtmp/parseurl.c
-        src/main/jniLibs/include/librtmp/rtmp.c
+
+        src/main/cpp/librtmp/amf.c
+        src/main/cpp/librtmp/hashswf.c
+        src/main/cpp/librtmp/log.c
+        src/main/cpp/librtmp/parseurl.c
+        src/main/cpp/librtmp/rtmp.c
+
+#        src/main/jniLibs/include/librtmp/amf.c
+#        src/main/jniLibs/include/librtmp/hashswf.c
+#        src/main/jniLibs/include/librtmp/log.c
+#        src/main/jniLibs/include/librtmp/parseurl.c
+#        src/main/jniLibs/include/librtmp/rtmp.c
 
         )
 
