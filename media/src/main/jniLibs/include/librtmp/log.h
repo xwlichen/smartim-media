@@ -33,14 +33,13 @@ extern "C" {
 #endif
 /* Enable this to get full debugging output */
 /* #define _DEBUG */
-#define _DEBUG
 
 #ifdef _DEBUG
 #undef NODEBUG
 #endif
 
 typedef enum
-{ RTMP_LOGCRIT, RTMP_LOGERROR=1, RTMP_LOGWARNING, RTMP_LOGINFO,
+{ RTMP_LOGCRIT=0, RTMP_LOGERROR, RTMP_LOGWARNING, RTMP_LOGINFO,
   RTMP_LOGDEBUG, RTMP_LOGDEBUG2, RTMP_LOGALL
 } RTMP_LogLevel;
 

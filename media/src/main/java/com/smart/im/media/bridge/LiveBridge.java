@@ -12,6 +12,8 @@ public class LiveBridge {
 
     static {
         System.loadLibrary("smart-live");
+//        System.loadLibrary("smart-rtmp");
+
     }
 
 

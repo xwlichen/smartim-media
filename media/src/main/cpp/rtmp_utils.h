@@ -19,7 +19,8 @@ extern "C" {
 #include <libavutil/pixfmt.h>
 #include <libavcodec/avcodec.h>
 #include <x264.h>
-#include <librtmp/rtmp.h>
+#include "librtmp/rtmp.h"
+
 }
 
 

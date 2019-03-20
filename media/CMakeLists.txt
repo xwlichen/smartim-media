@@ -49,7 +49,26 @@ add_library( # Sets the name of the library.
         src/main/cpp/queue.c
         src/main/cpp/thread_safe_queue.cpp
 
+        src/main/jniLibs/include/librtmp/amf.c
+        src/main/jniLibs/include/librtmp/hashswf.c
+        src/main/jniLibs/include/librtmp/log.c
+        src/main/jniLibs/include/librtmp/parseurl.c
+        src/main/jniLibs/include/librtmp/rtmp.c
+
         )
+
+
+#add_library( # Sets the name of the library.
+#        `
+#
+#        # Sets the library as a shared library.
+#        SHARED
+#
+#        # Provides a relative path to your source file(s).
+#
+#
+#        )
+
 
 # 编解码(最重要的库)
 add_library(
@@ -169,15 +188,34 @@ set_target_properties(
 
 
 # rtmp格式
+#add_library(
+#        rtmp
+#        SHARED
+#        IMPORTED)
+#set_target_properties(
+#        rtmp
+#        PROPERTIES IMPORTED_LOCATION
+#        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/librtmp.a)
+
+# crypto
 add_library(
-        rtmp
+        crypto
         SHARED
         IMPORTED)
 set_target_properties(
-        rtmp
+        crypto
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/librtmp.a)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libcrypto.so)
 
+# ssl
+add_library(
+        ssl
+        SHARED
+        IMPORTED)
+set_target_properties(
+        ssl
+        PROPERTIES IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libssl.so)
 
 
 find_library( # Sets the name of the path variable.
@@ -187,10 +225,15 @@ find_library( # Sets the name of the path variable.
         # you want CMake to locate.
         log)
 
+#这里openssl需要 zlib库，加载系统的
+find_library( z-lib
+              z )
+
 
 target_link_libraries( # Specifies the target library.
 #        ffmpeg-jni
         smart-live
+#        smart-rtmp
 
         avcodec
         avdevice
@@ -204,7 +247,11 @@ target_link_libraries( # Specifies the target library.
         x264
         yuv
         fdk-aac
-        rtmp
+#        rtmp
+
+        crypto
+        ssl
         # Links the target library to the log library
         # included in the NDK.
-        ${log-lib})
+        ${log-lib}
+        ${z-lib})
