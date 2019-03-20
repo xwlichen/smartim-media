@@ -248,9 +248,9 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
 
 
 void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
-    LOGE(JNI_DEBUG, "add_packet before")
+//    LOGE(JNI_DEBUG, "add_packet before")
     frame_queue.push(rtmpPacket);
-    LOGE(JNI_DEBUG, "add_packet after")
+//    LOGE(JNI_DEBUG, "add_packet after")
 
 
 }
@@ -401,12 +401,11 @@ void *push_thread(void *args) {
             if (frame_queue.empty()) {
                 continue;
             }
-//        RTMPPacket *packet = (RTMPPacket *)(frame_queue.wait_and_pop().get());
             RTMPPacket *packet;
             frame_queue.wait_and_pop(packet);
 
             if (packet) {
-                LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
+//                LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
 
                 //发送rtmp包，true代表rtmp内部有缓存
                 int ret;
@@ -414,7 +413,7 @@ void *push_thread(void *args) {
                 ret = RTMP_SendPacket(rtmp, packet, TRUE);
 
 
-                LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
+//                LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
 
                 if (!ret) {
                     LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");

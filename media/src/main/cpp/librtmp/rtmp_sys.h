@@ -62,6 +62,7 @@
 #endif
 
 #include "rtmp.h"
+#include <stdio.h>
 
 #ifdef USE_POLARSSL
 #include <polarssl/net.h>

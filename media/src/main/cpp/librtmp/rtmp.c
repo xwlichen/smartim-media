@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "rtmp_sys.h"
 #include "log.h"
@@ -141,6 +142,8 @@ static int clk_tck;
 
 #ifdef CRYPTO
 #include "handshake.h"
+#include "../log.h"
+
 #endif
 
 uint32_t
@@ -1285,15 +1288,17 @@ WriteN(RTMP *r, const char *buffer, int n) {
         else
             nBytes = RTMPSockBuf_Send(&r->m_sb, ptr, n);
         /*RTMP_Log(RTMP_LOGDEBUG, "%s: %d\n", __FUNCTION__, nBytes); */
+        LOGE(JNI_DEBUG,"nBytes=%d",nBytes);
 
         if (nBytes < 0) {
             int sockerr = GetSockError();
             RTMP_Log(RTMP_LOGERROR, "%s, RTMP send error %d (%d bytes)", __FUNCTION__,
                      sockerr, n);
 
+            LOGE(JNI_DEBUG,"sockerr=%d ,RTMP_ctrlC= %d ",sockerr,RTMP_ctrlC);
             if (sockerr == EINTR && !RTMP_ctrlC)
                 continue;
-
+            r->Link.protocol &= ~RTMP_FEATURE_WRITE;
             RTMP_Close(r);
             n = 1;
             break;
@@ -3055,8 +3060,10 @@ RTMP_SendPacket(RTMP *r, RTMPPacket *packet, int queue) {
             toff += nChunkSize + hSize;
         } else {
             wrote = WriteN(r, header, nChunkSize + hSize);
-            if (!wrote)
+            if (!wrote) {
+                LOGE(JNI_DEBUG,"wrote is null");
                 return FALSE;
+            }
         }
         nSize -= nChunkSize;
         buffer += nChunkSize;
