@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <errno.h>
 
 #include "rtmp_sys.h"
 #include "log.h"
@@ -1298,8 +1297,8 @@ WriteN(RTMP *r, const char *buffer, int n) {
             LOGE(JNI_DEBUG,"sockerr=%d ,RTMP_ctrlC= %d ",sockerr,RTMP_ctrlC);
             if (sockerr == EINTR && !RTMP_ctrlC)
                 continue;
-            r->Link.protocol &= ~RTMP_FEATURE_WRITE;
             RTMP_Close(r);
+//            r->Link.protocol &= ~RTMP_FEATURE_WRITE;
             n = 1;
             break;
         }

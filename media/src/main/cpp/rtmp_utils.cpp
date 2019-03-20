@@ -405,7 +405,7 @@ void *push_thread(void *args) {
             frame_queue.wait_and_pop(packet);
 
             if (packet) {
-//                LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
+                LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
 
                 //发送rtmp包，true代表rtmp内部有缓存
                 int ret;
@@ -413,13 +413,13 @@ void *push_thread(void *args) {
                 ret = RTMP_SendPacket(rtmp, packet, TRUE);
 
 
-//                LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
+                LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
 
-                if (!ret) {
-                    LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
-                    RTMPPacket_Free(packet);
-                    goto end;
-                }
+//                if (!ret) {
+//                    LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
+//                    RTMPPacket_Free(packet);
+//                    goto end;
+//                }
             }
         }
         end:
