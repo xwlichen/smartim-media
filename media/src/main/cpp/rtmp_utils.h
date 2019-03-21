@@ -9,11 +9,10 @@
 #define SMARTIM_MEDIA_RTMP_UTILS_H
 
 
-#include <stdint.h>
+//#include <stdint.h>
 #include <string.h>
 #include <pthread.h>
 #include <malloc.h>
-#include "thread_safe_queue.cpp"
 
 extern "C" {
 #include <libavutil/pixfmt.h>
@@ -24,7 +23,10 @@ extern "C" {
 }
 
 
+
+
 #define RTMP_MAX_HEADER_SIZE 18
+
 
 class RtmpUtils {
 
@@ -58,7 +60,12 @@ public :
     void add_packet(RTMPPacket *rtmpPacket);
 
     void init_thread();
+
+//    void on_error(int code);
 //     void *push_thread(void * args);
 };
+
+
+
 
 #endif //SMARTIM_MEDIA_RTMP_UTILS_H

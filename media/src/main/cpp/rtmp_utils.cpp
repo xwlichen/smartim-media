@@ -11,10 +11,14 @@
 #include <stdint.h>
 #include <malloc.h>
 //#include <stdio.h>
+#include "thread_safe_queue.h"
 
-extern "C" {
-#include "queue.h"
-}
+
+
+
+//extern "C" {
+//#include "queue.h"
+//}
 
 using namespace std;
 
@@ -49,6 +53,28 @@ RtmpUtils::~RtmpUtils() {
 //    (*env)->CallVoidMethod(env, jobject_error, jmethod, error_code);
 //    (*javaVM)->DetachCurrentThread(javaVM);
 //}
+
+void  on_error(int code){
+    if (code==EPIPE ){
+        if (rtmp){
+            RTMP_Close(rtmp);
+            if (!RTMP_IsConnected(rtmp)){
+                if (!RTMP_Connect(rtmp, NULL)) {
+                    LOGE(JNI_DEBUG, "RTMP_Connect error");
+                } else {
+                    LOGE(JNI_DEBUG, "RTMP_Connect success");
+                    //连接到rtmp流
+                    if (!RTMP_ConnectStream(rtmp, 0)) {
+                        LOGE(JNI_DEBUG, "RTMP_ConnectStream error");
+                    } else {
+                        LOGE(JNI_DEBUG, "RTMP_ConnectStream success");
+                    }
+                }
+            }
+
+        }
+    }
+}
 
 
 /**
@@ -408,12 +434,13 @@ void *push_thread(void *args) {
                 LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
 
                 //发送rtmp包，true代表rtmp内部有缓存
-                int ret;
+                int code;
 
-                ret = RTMP_SendPacket(rtmp, packet, TRUE);
+                code = RTMP_SendPacketWithCode(rtmp, packet, TRUE);
 
 
-                LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
+                LOGE(JNI_DEBUG, "RTMP_SendPacket code: %d", code);
+                on_error(code);
 
 //                if (!ret) {
 //                    LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
@@ -447,6 +474,9 @@ void RtmpUtils::init_thread() {
     //创建消费线程推流
     pthread_create(&push_thread_id, NULL, push_thread, this);
 }
+
+
+
 
 
 

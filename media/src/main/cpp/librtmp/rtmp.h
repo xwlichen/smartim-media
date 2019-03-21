@@ -288,6 +288,8 @@ extern "C"
 
   int RTMP_ReadPacket(RTMP *r, RTMPPacket *packet);
   int RTMP_SendPacket(RTMP *r, RTMPPacket *packet, int queue);
+  int RTMP_SendPacketWithCode(RTMP *r, RTMPPacket *packet, int queue);
+
   int RTMP_SendChunk(RTMP *r, RTMPChunk *chunk);
   int RTMP_IsConnected(RTMP *r);
   int RTMP_Socket(RTMP *r);
@@ -333,6 +335,8 @@ extern "C"
   void RTMP_DropRequest(RTMP *r, int i, int freeit);
   int RTMP_Read(RTMP *r, char *buf, int size);
   int RTMP_Write(RTMP *r, const char *buf, int size);
+
+
 
 /* hashswf.c */
   int RTMP_HashSWF(const char *url, unsigned int *size, unsigned char *hash,

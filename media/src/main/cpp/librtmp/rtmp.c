@@ -1287,18 +1287,27 @@ WriteN(RTMP *r, const char *buffer, int n) {
         else
             nBytes = RTMPSockBuf_Send(&r->m_sb, ptr, n);
         /*RTMP_Log(RTMP_LOGDEBUG, "%s: %d\n", __FUNCTION__, nBytes); */
-        LOGE(JNI_DEBUG,"nBytes=%d",nBytes);
+//        LOGE(JNI_DEBUG,"nBytes=%d",nBytes);
 
         if (nBytes < 0) {
             int sockerr = GetSockError();
             RTMP_Log(RTMP_LOGERROR, "%s, RTMP send error %d (%d bytes)", __FUNCTION__,
                      sockerr, n);
 
-            LOGE(JNI_DEBUG,"sockerr=%d ,RTMP_ctrlC= %d ",sockerr,RTMP_ctrlC);
             if (sockerr == EINTR && !RTMP_ctrlC)
                 continue;
-            RTMP_Close(r);
-//            r->Link.protocol &= ~RTMP_FEATURE_WRITE;
+
+            if (sockerr<0){
+                r->Link.protocol &= ~RTMP_FEATURE_WRITE;
+                RTMP_Close(r);
+            }else if(EPIPE==sockerr){
+//                on_error(sockerr,RTMP);
+
+            }else{
+                RTMP_Close(r);
+
+            }
+
             n = 1;
             break;
         }
@@ -3113,6 +3122,18 @@ RTMP_SendPacket(RTMP *r, RTMPPacket *packet, int queue) {
     memcpy(r->m_vecChannelsOut[packet->m_nChannel], packet, sizeof(RTMPPacket));
     return TRUE;
 }
+
+int RTMP_SendPacketWithCode(RTMP *r, RTMPPacket *packet, int queue){
+    int code=0;
+    int ret=RTMP_SendPacket(r,packet,queue);
+    if (!ret){
+        code = GetSockError();
+        LOGE(JNI_DEBUG,"sockerr=%d ",code);
+
+    }
+    return code;
+}
+
 
 int
 RTMP_Serve(RTMP *r) {
