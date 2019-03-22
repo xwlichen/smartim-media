@@ -452,7 +452,11 @@ void *push_thread(void *args) {
 
 
             LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
-            RTMPPacket_Free(packet);
+//            RTMPPacket_Free(packet);
+//            if (packet){
+//                free(packet);
+//                packet=NULL;
+//            }
 
         }
         pthread_mutex_unlock(&mutex);
