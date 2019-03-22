@@ -83,7 +83,7 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
     public void startPreview(SurfaceView surfaceView) {
         this.surfaceView = surfaceView;
         cameraUtil.setContext(surfaceView.getContext());
-        cameraUtil.initCamera(cameraUtil.getCurrentType());
+        cameraUtil.initCamera(Camera.CameraInfo.CAMERA_FACING_FRONT);
         cameraUtil.startPreview(surfaceView.getHolder(), this);
         surfaceView.getHolder().addCallback(this);
     }

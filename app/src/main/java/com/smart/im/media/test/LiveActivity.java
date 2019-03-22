@@ -43,8 +43,9 @@ public class LiveActivity extends Activity {
     public void initPusher() {
         LivePushConfig config = new LivePushConfig();
 //        String url = "rtmp://livepush.changguwen.com/changdao/xwRoom?auth_key=1552960379-cbbf3a97f8ea48b694dad7c139d07732-0-8296a36418ff764c576463f577c7e70d";
-//        String url="rtmp://192.168.5.165:1935/rtmplive/room";
-        String url = "rtmp://livepush.changguwen.com/changdao/xwRoom?auth_key=1553135112-86cff31677f84f049936642a81aa6271-0-f568d5e59d015bd7a0176043c324fccd";
+        String url="rtmp://192.168.1.96:1935/rtmplive/room";
+//        String url = "rtmp://livepush.changguwen.com/changdao/xwRoom?auth_key=1553220061-e2b7c75cf1c44689ac8e92cabe4ebf92-0-d98094b4a0d2a5b33ed85618d7ea7497";
+
 
         config.setUrl(url);
         livePusher = new SmartLivePusher();

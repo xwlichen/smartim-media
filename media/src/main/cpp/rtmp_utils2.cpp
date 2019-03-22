@@ -10,16 +10,15 @@
 #include <jni.h>
 #include <stdint.h>
 #include <malloc.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include "thread_safe_queue.h"
-
-
 
 
 extern "C" {
 #include "queue.h"
 }
 
+//using namespace std;
 
 #define RTMP_HEAD_SIZE   (sizeof(RTMPPacket) + RTMP_MAX_HEADER_SIZE)
 
@@ -273,7 +272,6 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
 
 
 void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
-
     pthread_mutex_lock(&mutex);
     if (is_pushing) {
         queue_append_last(rtmpPacket);
@@ -409,13 +407,10 @@ void *push_thread(void *args) {
 
     if (!rtmp) {
         LOGE(JNI_DEBUG, "RTMP_Alloc fail...");
-//        goto end;
     }
     if (!RTMP_IsConnected(rtmp)) {
         LOGE(JNI_DEBUG, "RTMP_Connect fail...");
         RTMP_Connect(rtmp, NULL);
-//        throw_error_to_java(ERROR_RTMP_CONNECT);
-//        goto end;
     }
     LOGI(JNI_DEBUG, "RTMP_Connect success...");
     if (!RTMP_ConnectStream(rtmp, 0)) {
@@ -427,39 +422,41 @@ void *push_thread(void *args) {
     is_pushing = TRUE;
     //发送一个ACC HEADER
 //    add_aac_header();
+
     //循环推流
     while (is_pushing) {
-//        if (frame_queue.empty()) {
-//            continue;
-//        }
-//        RTMPPacket *packet;
-//        frame_queue.wait_and_pop(packet);
-
+//            if (frame_queue.empty()) {
+//                continue;
+//            }
         pthread_mutex_lock(&mutex);
         pthread_cond_wait(&cond, &mutex);
         //从队头去一个RTMP包出来
-        RTMPPacket *packet = static_cast<RTMPPacket *>(queue_get_first());
+        RTMPPacket *packet = (RTMPPacket *) queue_get_first();
+//            frame_queue.wait_and_pop(packet);
 
         if (packet) {
             LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
-
+            queue_delete_first();
             //发送rtmp包，true代表rtmp内部有缓存
             int code;
 
-            queue_delete_first();
-            //发送rtmp包，true代表rtmp内部有缓存
-            int ret = RTMP_SendPacket(rtmp, packet, TRUE);
+            code = RTMP_SendPacketWithCode(rtmp, packet, TRUE);
 
 
-            LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
-//            RTMPPacket_Free(packet);
+            LOGE(JNI_DEBUG, "RTMP_SendPacket code: %d", code);
+            on_error(code);
 
+//                if (!ret) {
+//                    LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
+//                    RTMPPacket_Free(packet);
+//                    goto end;
+//                }
         }
         pthread_mutex_unlock(&mutex);
+
     }
     end:
     LOGI(JNI_DEBUG, "free all the thing about rtmp...");
-
 //    RTMP_Close(rtmp);
 //    free(rtmp);
     return 0;

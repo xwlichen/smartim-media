@@ -28,7 +28,7 @@ public class CameraUtil {
     private int rotation; //摄像头旋转角度
     private int preWidth = 640; //
     private int preHeight = 480;
-    private int currentType = Camera.CameraInfo.CAMERA_FACING_BACK; //摄像头的的前后置
+    private int currentType = Camera.CameraInfo.CAMERA_FACING_FRONT; //摄像头的的前后置
 
 
     public CameraUtil() {
@@ -143,22 +143,27 @@ public class CameraUtil {
         }
         Camera.CameraInfo info = new Camera.CameraInfo();
         int cameraId = 0;
-        int nucameras = Camera.getNumberOfCameras();
-        for (int i = 0; i < nucameras; i++) {
-            Camera.getCameraInfo(i, info);
-            if (info.facing == cameraType) {
-                cameraId = i;
-                camera = Camera.open(i);
-                currentType = cameraType;
-                break;
-            }
+//        int nucameras = Camera.getNumberOfCameras();
+//        for (int i = 0; i < nucameras; i++) {
+//            Camera.getCameraInfo(i, info);
+//            if (info.facing == cameraType) {
+//                cameraId = i;
+//                camera = Camera.open(i);
+//                currentType = cameraType;
+//                break;
+//            }
+//        }
+        try {
+            camera = Camera.open(cameraType);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         if (camera == null) {
             throw new RuntimeException("unable to open camera");
         }
 
         //这边是设置旋转的
-        rotation = setCameraDisplayRotation(cameraId);
+//        rotation = setCameraDisplayRotation(cameraId);
 
         Camera.Parameters parameters = camera.getParameters();
         chooseCameraSize(parameters, preWidth, preHeight, 1);

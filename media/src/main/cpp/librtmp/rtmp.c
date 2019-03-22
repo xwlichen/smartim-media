@@ -1296,17 +1296,18 @@ WriteN(RTMP *r, const char *buffer, int n) {
 
             if (sockerr == EINTR && !RTMP_ctrlC)
                 continue;
+            RTMP_Close(r);
 
-            if (sockerr<0){
-                r->Link.protocol &= ~RTMP_FEATURE_WRITE;
-                RTMP_Close(r);
-            }else if(EPIPE==sockerr){
-//                on_error(sockerr,RTMP);
-
-            }else{
-                RTMP_Close(r);
-
-            }
+//            if (sockerr<0){
+//                r->Link.protocol &= ~RTMP_FEATURE_WRITE;
+//                RTMP_Close(r);
+//            }else if(EPIPE==sockerr){
+////                on_error(sockerr,RTMP);
+//
+//            }else{
+////                RTMP_Close(r);
+//
+//            }
 
             n = 1;
             break;
