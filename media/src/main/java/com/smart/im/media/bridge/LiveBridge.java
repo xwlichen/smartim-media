@@ -38,9 +38,9 @@ public class LiveBridge {
                 config.getBitRate(),
                 config.getFrameRate());
 
-//        initAudioConfig(config.getNumChannels(),
-//                config.getSampleRate(),
-//                config.getAudioBitRate());
+        initAudioConfig(config.getNumChannels(),
+                config.getSampleRate(),
+                config.getAudioBitRate());
 
     }
 

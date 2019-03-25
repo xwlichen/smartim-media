@@ -116,7 +116,7 @@ void RtmpUtils::add_x264_data(x264_nal_t *nal, int nal_num) {
     int i = 0;
     //0x00 0x00 0x01）  0x00 0x00 0x00 0x01   都是视频帧（NALU数据单元）之间的间隔标识
     for (; i < nal_num; ++i) {
-        LOGE(JNI_DEBUG,"nal[i].i_type=%d",nal[i].i_type);
+//        LOGE(JNI_DEBUG,"nal[i].i_type=%d",nal[i].i_type);
         if (nal[i].i_type == NAL_SPS) {//sps
             sps_len = nal[i].i_payload - 4;
             memcpy(sps, nal[i].p_payload + 4, (size_t) sps_len);
@@ -390,11 +390,14 @@ void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
     packet->m_nInfoField2 = rtmp->m_stream_id;
 
-    //send rtmp aac head
-    if (RTMP_IsConnected(rtmp)) {
-        RTMP_SendPacket(rtmp, packet, TRUE);
-        //LOGD("send packet sendAacSpec");
-    }
+
+    add_packet(packet);
+
+//    //send rtmp aac head
+//    if (RTMP_IsConnected(rtmp)) {
+//        RTMP_SendPacket(rtmp, packet, TRUE);
+//        //LOGD("send packet sendAacSpec");
+//    }
 //    free(packet);
 }
 
@@ -425,14 +428,16 @@ void RtmpUtils::add_acc_body(unsigned char *buf, int len, long timeStamp) {
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
-    //LOGI("aac m_nTimeStamp = %d", packet->m_nTimeStamp);
+    LOGE(JNI_DEBUG,"aac m_nTimeStamp = %d", packet->m_nTimeStamp);
     packet->m_nInfoField2 = rtmp->m_stream_id;
 
-    //send rtmp aac data
-    if (RTMP_IsConnected(rtmp)) {
-        RTMP_SendPacket(rtmp, packet, TRUE);
-        //LOGD("send packet sendAccBody");
-    }
+    add_packet(packet);
+
+//    //send rtmp aac data
+//    if (RTMP_IsConnected(rtmp)) {
+//        RTMP_SendPacket(rtmp, packet, TRUE);
+//        //LOGD("send packet sendAccBody");
+//    }
 //    free(packet);
 }
 

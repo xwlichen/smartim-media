@@ -8,9 +8,9 @@
 #include "audio_acc.h"
 
 Audio_ACC::Audio_ACC(int channels, int sampleRate, int bitRate) {
-    this->channels;
-    this->sampleRate;
-    this->bitRate;
+    this->channels=channels;
+    this->sampleRate=sampleRate;
+    this->bitRate=bitRate;
 }
 
 Audio_ACC::~Audio_ACC() {
@@ -20,47 +20,47 @@ Audio_ACC::~Audio_ACC() {
 int Audio_ACC::init() {
     //打开AAC音频编码引擎，创建AAC编码句柄
     if (aacEncOpen(&handle, 0, channels) != AACENC_OK) {
-        LOGI(JNI_DEBUG,"Unable to open fdkaac encoder\n");
+        LOGE(JNI_DEBUG,"Unable to open fdkaac encoder\n");
         return -1;
     }
 
     // AACENC_AOT设置为aac lc
     if (aacEncoder_SetParam(handle, AACENC_AOT, 2) != AACENC_OK) {
-        LOGI(JNI_DEBUG,"Unable to set the AOT\n");
+        LOGE(JNI_DEBUG,"Unable to set the AOT\n");
         return -1;
     }
 
     if (aacEncoder_SetParam(handle, AACENC_SAMPLERATE, sampleRate) != AACENC_OK) {
-        LOGI(JNI_DEBUG,"Unable to set the sampleRate\n");
+        LOGE(JNI_DEBUG,"Unable to set the sampleRate\n");
         return -1;
     }
 
     // AACENC_CHANNELMODE设置为双通道
     if (aacEncoder_SetParam(handle, AACENC_CHANNELMODE, MODE_2) != AACENC_OK) {
-        LOGI(JNI_DEBUG,"Unable to set the channel mode\n");
+        LOGE(JNI_DEBUG,"Unable to set the channel mode\n");
         return -1;
     }
 
     if (aacEncoder_SetParam(handle, AACENC_CHANNELORDER, 1) != AACENC_OK) {
-        LOGI(JNI_DEBUG,"Unable to set the wav channel order\n");
+        LOGE(JNI_DEBUG,"Unable to set the wav channel order\n");
         return 1;
     }
     if (aacEncoder_SetParam(handle, AACENC_BITRATE, bitRate) != AACENC_OK) {
-        LOGI(JNI_DEBUG,"Unable to set the bitrate\n");
+        LOGE(JNI_DEBUG,"Unable to set the bitrate\n");
         return -1;
     }
     if (aacEncoder_SetParam(handle, AACENC_TRANSMUX, 2) != AACENC_OK) { //0-raw 2-adts
-        LOGI(JNI_DEBUG,"Unable to set the ADTS transmux\n");
+        LOGE(JNI_DEBUG,"Unable to set the ADTS transmux\n");
         return -1;
     }
 
     if (aacEncoder_SetParam(handle, AACENC_AFTERBURNER, 1) != AACENC_OK) {
-        LOGI(JNI_DEBUG,"Unable to set the ADTS AFTERBURNER\n");
+        LOGE(JNI_DEBUG,"Unable to set the ADTS AFTERBURNER\n");
         return -1;
     }
 
     if (aacEncEncode(handle, NULL, NULL, NULL, NULL) != AACENC_OK) {
-        LOGI(JNI_DEBUG,"Unable to initialize the encoder\n");
+        LOGE(JNI_DEBUG,"Unable to initialize the encoder\n");
         return -1;
     }
 
