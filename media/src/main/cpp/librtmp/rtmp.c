@@ -1293,6 +1293,7 @@ WriteN(RTMP *r, const char *buffer, int n) {
             int sockerr = GetSockError();
             RTMP_Log(RTMP_LOGERROR, "%s, RTMP send error %d (%d bytes)", __FUNCTION__,
                      sockerr, n);
+            LOGE(JNI_DEBUG,"sockerr :%d",sockerr);
 
             if (sockerr == EINTR && !RTMP_ctrlC)
                 continue;

@@ -50,11 +50,11 @@ add_library( # Sets the name of the library.
         src/main/cpp/thread_safe_queue.cpp
 
 
-#        src/main/cpp/librtmp/amf.c
-#        src/main/cpp/librtmp/hashswf.c
-#        src/main/cpp/librtmp/log.c
-#        src/main/cpp/librtmp/parseurl.c
-#        src/main/cpp/librtmp/rtmp.c
+        src/main/cpp/librtmp/amf.c
+        src/main/cpp/librtmp/hashswf.c
+        src/main/cpp/librtmp/log.c
+        src/main/cpp/librtmp/parseurl.c
+        src/main/cpp/librtmp/rtmp.c
 
 #        src/main/jniLibs/include/librtmp/amf.c
 #        src/main/jniLibs/include/librtmp/hashswf.c
@@ -195,14 +195,14 @@ set_target_properties(
 
 
 # rtmp格式
-add_library(
-        rtmp
-        SHARED
-        IMPORTED)
-set_target_properties(
-        rtmp
-        PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/librtmp.a)
+#add_library(
+#        rtmp
+#        SHARED
+#        IMPORTED)
+#set_target_properties(
+#        rtmp
+#        PROPERTIES IMPORTED_LOCATION
+#        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/librtmp.a)
 
 # crypto
 add_library(
@@ -254,12 +254,12 @@ target_link_libraries( # Specifies the target library.
         x264
         yuv
         fdk-aac
-        rtmp
+#        rtmp
 
-#        crypto
-#        ssl
+        crypto
+        ssl
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib}
-#        ${z-lib}
+        ${z-lib}
         )

@@ -79,14 +79,13 @@ int Frame_X264::encode_frame(char *inBytes, int pts) {
     int i420_u_size = (in_width >> 1) * (in_height >> 1);
     int i420_v_size = i420_u_size;
 
-    const uint8_t *i420_y_data = (uint8_t *) inBytes;
-    const uint8_t *i420_u_data = (uint8_t *) inBytes + i420_y_size;
-    const uint8_t *i420_v_data = (uint8_t *) inBytes + i420_y_size + i420_u_size;
+    uint8_t *i420_y_data = (uint8_t *) inBytes;
+    uint8_t *i420_u_data = (uint8_t *) inBytes + i420_y_size;
+    uint8_t *i420_v_data = (uint8_t *) inBytes + i420_y_size + i420_u_size;
     //将Y,U,V数据保存到pic_in.img的对应的分量中，还有一种方法是用AV_fillPicture和sws_scale来进行变换
     memcpy(pic_in.img.plane[0], i420_y_data, i420_y_size);
     memcpy(pic_in.img.plane[1], i420_u_data, i420_u_size);
     memcpy(pic_in.img.plane[2], i420_v_data, i420_v_size);
-
 
     // and encode and store into pic_out
     pic_in.i_pts = pts;
@@ -146,8 +145,6 @@ void Frame_X264::set_x264_params() {
 
     //并行编码多帧
     params.i_threads = X264_SYNC_LOOKAHEAD_AUTO;
-//    params.i_threads = 1;
-
     params.i_fps_num = 25;//getFps();
     params.i_fps_den = 1;
 

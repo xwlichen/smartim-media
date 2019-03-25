@@ -2,7 +2,7 @@
  * @date : 2019/3/14 下午6:40
  * @author: lichen
  * @email : 1960003945@qq.com
- * @description : 
+ * @description :
  */
 //
 #include "rtmp_utils.h"
@@ -116,6 +116,7 @@ void RtmpUtils::add_x264_data(x264_nal_t *nal, int nal_num) {
     int i = 0;
     //0x00 0x00 0x01）  0x00 0x00 0x00 0x01   都是视频帧（NALU数据单元）之间的间隔标识
     for (; i < nal_num; ++i) {
+        LOGE(JNI_DEBUG,"nal[i].i_type=%d",nal[i].i_type);
         if (nal[i].i_type == NAL_SPS) {//sps
             sps_len = nal[i].i_payload - 4;
             memcpy(sps, nal[i].p_payload + 4, (size_t) sps_len);
@@ -203,85 +204,116 @@ RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, i
 
     add_packet(packet);
 
-    free(packet);
+//    free(packet);
 
 }
 
 void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
-    //去掉起始码(界定符)
-    if (buf[2] == 0x00) {
-        //00 00 00 01
-        buf += 4;
-        len -= 4;
-    } else if (buf[2] == 0x01) {
-        // 00 00 01
+//    //去掉起始码(界定符)
+//    if (buf[2] == 0x00) {
+//        //00 00 00 01
+//        buf += 4;
+//        len -= 4;
+//    } else if (buf[2] == 0x01) {
+//        // 00 00 01
+//        buf += 3;
+//        len -= 3;
+//    }
+//    int body_size = len + 9;
+//    RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 9 + len);
+//    memset(packet, 0, RTMP_HEAD_SIZE);
+//    packet->m_body = (char *) packet + RTMP_HEAD_SIZE;
+//
+//    unsigned char *body = (unsigned char *) packet->m_body;
+//    //当NAL头信息中，type（5位）等于5，说明这是关键帧NAL单元
+//    //buf[0] NAL Header与运算，获取type，根据type判断关键帧和普通帧
+//    //00000101 & 00011111(0x1f) = 00000101
+//    int type = buf[0] & 0x1f;
+//    //Pframe  7:AVC
+//    body[0] = 0x27;
+//    //IDR I帧图像
+//    //Iframe  7:AVC
+//    if (type == NAL_SLICE_IDR) {
+//        body[0] = 0x17;
+//    }
+//    //AVCPacketType = 1
+//    /*nal unit,NALUs（AVCPacketType == 1)*/
+//    body[1] = 0x01;
+//    //composition time 0x000000 24bit
+//    body[2] = 0x00;
+//    body[3] = 0x00;
+//    body[4] = 0x00;
+//
+//    //写入NALU信息，右移8位，一个字节的读取
+//    body[5] = (len >> 24) & 0xff;
+//    body[6] = (len >> 16) & 0xff;
+//    body[7] = (len >> 8) & 0xff;
+//    body[8] = (len) & 0xff;
+//
+//    /*copy data*/
+//    memcpy(&body[9], buf, len);
+//
+//    packet->m_hasAbsTimestamp = 0;
+//    packet->m_nBodySize = body_size;
+//    //当前packet的类型：Video
+//    packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
+//    packet->m_nChannel = 0x04;
+//    packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+//    packet->m_nInfoField2 = rtmp->m_stream_id;
+//    //记录了每一个tag相对于第一个tag（File Header）的相对时间
+//    packet->m_nTimeStamp = RTMP_GetTime() - start_time;
+//
+//    add_packet(packet);
+
+    if(buf[2] == 0x01){//00 00 01
         buf += 3;
         len -= 3;
+    } else if (buf[3] == 0x01){//00 00 00 01
+        buf += 4;
+        len -= 4;
     }
-
-
-    int body_size = len + 9;
-    RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 9 + len);
-    memset(packet, 0, RTMP_HEAD_SIZE);
-    packet->m_body = (char *) packet + RTMP_HEAD_SIZE;
-
+    int body_size = len + 9;//
+    RTMPPacket *packet = (RTMPPacket *)malloc(sizeof(RTMPPacket));
+    RTMPPacket_Alloc(packet, body_size);
+    RTMPPacket_Reset(packet);
     unsigned char *body = (unsigned char *) packet->m_body;
-    //当NAL头信息中，type（5位）等于5，说明这是关键帧NAL单元
-    //buf[0] NAL Header与运算，获取type，根据type判断关键帧和普通帧
-    //00000101 & 00011111(0x1f) = 00000101
-    int type = buf[0] & 0x1f;
-    //Pframe  7:AVC
-    body[0] = 0x27;
-    //IDR I帧图像
-    //Iframe  7:AVC
-    if (type == NAL_SLICE_IDR) {
+    int type = buf[0] & 0x1F;
+    if(type == NAL_SLICE_IDR){//关键帧
         body[0] = 0x17;
+    } else{
+        body[0] = 0x27;
     }
-    //AVCPacketType = 1
-    /*nal unit,NALUs（AVCPacketType == 1)*/
     body[1] = 0x01;
-    //composition time 0x000000 24bit
     body[2] = 0x00;
     body[3] = 0x00;
     body[4] = 0x00;
 
-    //写入NALU信息，右移8位，一个字节的读取
-    body[5] = (len >> 24) & 0xff;
-    body[6] = (len >> 16) & 0xff;
-    body[7] = (len >> 8) & 0xff;
-    body[8] = (len) & 0xff;
+    body[5] = (unsigned char) ((len >> 24) & 0xFF);
+    body[6] = (unsigned char) ((len >> 16) & 0xFF);
+    body[7] = (unsigned char) ((len >> 8) & 0xFF);
+    body[8] = (unsigned char) (len & 0xFF);
 
-    /*copy data*/
-    memcpy(&body[9], buf, len);
-
-    packet->m_hasAbsTimestamp = 0;
-    packet->m_nBodySize = body_size;
-    //当前packet的类型：Video
-    packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
-    packet->m_nChannel = 0x04;
+    memcpy(&body[9], buf, (size_t) len);
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
-    packet->m_nInfoField2 = rtmp->m_stream_id;
-    //记录了每一个tag相对于第一个tag（File Header）的相对时间
+    packet->m_hasAbsTimestamp = 0;
+    packet->m_nBodySize = (uint32_t) body_size;
+    packet->m_nChannel = 0x04;
+    packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
 
-
     add_packet(packet);
-
-    free(packet);
-
 }
 
 
 void RtmpUtils::add_packet(RTMPPacket *rtmpPacket) {
+//    frame_queue.push(rtmpPacket);
 
     pthread_mutex_lock(&mutex);
-    if (is_pushing) {
+    if(is_pushing){
         queue_append_last(rtmpPacket);
     }
     pthread_cond_signal(&cond);
     pthread_mutex_unlock(&mutex);
-
-//    frame_queue.push(rtmpPacket);
 
 
 }
@@ -363,7 +395,7 @@ void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
         RTMP_SendPacket(rtmp, packet, TRUE);
         //LOGD("send packet sendAacSpec");
     }
-    free(packet);
+//    free(packet);
 }
 
 /**
@@ -401,7 +433,7 @@ void RtmpUtils::add_acc_body(unsigned char *buf, int len, long timeStamp) {
         RTMP_SendPacket(rtmp, packet, TRUE);
         //LOGD("send packet sendAccBody");
     }
-    free(packet);
+//    free(packet);
 }
 
 
@@ -429,37 +461,37 @@ void *push_thread(void *args) {
 //    add_aac_header();
     //循环推流
     while (is_pushing) {
-//        if (frame_queue.empty()) {
-//            continue;
-//        }
 //        RTMPPacket *packet;
 //        frame_queue.wait_and_pop(packet);
 
         pthread_mutex_lock(&mutex);
         pthread_cond_wait(&cond, &mutex);
         //从队头去一个RTMP包出来
-        RTMPPacket *packet = static_cast<RTMPPacket *>(queue_get_first());
+        RTMPPacket *packet = (RTMPPacket *)queue_get_first();
 
         if (packet) {
-            LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
+//            LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
 
             //发送rtmp包，true代表rtmp内部有缓存
             int code;
-
             queue_delete_first();
-            //发送rtmp包，true代表rtmp内部有缓存
-            int ret = RTMP_SendPacket(rtmp, packet, TRUE);
+
+            code = RTMP_SendPacketWithCode(rtmp, packet, TRUE);
+            LOGE(JNI_DEBUG, "RTMP_SendPacket code: %d", code);
+            RTMPPacket_Free(packet);
 
 
-            LOGE(JNI_DEBUG, "RTMP_SendPacket ret: %d", ret);
-//            RTMPPacket_Free(packet);
-//            if (packet){
-//                free(packet);
-//                packet=NULL;
-//            }
 
+            on_error(code);
+
+//                if (!ret) {
+//                    LOGE(JNI_DEBUG, "RTMP_SendPacket fail...");
+//                    RTMPPacket_Free(packet);
+//                    goto end;
+//                }
         }
         pthread_mutex_unlock(&mutex);
+
     }
     end:
     LOGI(JNI_DEBUG, "free all the thing about rtmp...");

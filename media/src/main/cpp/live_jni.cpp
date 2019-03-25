@@ -118,7 +118,7 @@ Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env, jobject ins
 
 
     video_fts++;
-    frame_x264->set_x264_nal_t(NULL);
+//    frame_x264->set_x264_nal_t(NULL);
     int nal_num = frame_x264->encode_frame(dst_i420_data, video_fts);
 
     rtmp_tils->add_x264_data(frame_x264->get_x264_nal_t(), nal_num);
@@ -136,14 +136,14 @@ Java_com_smart_im_media_bridge_LiveBridge_pushAudioData(JNIEnv *env, jobject ins
                                                         jbyteArray data_) {
     jbyte *data = env->GetByteArrayElements(data_, NULL);
     unsigned char *dst_acc_data = (unsigned char *)malloc(1024);
-    audio_valid_size=audio_acc->encodeAudio((unsigned char*)data,audio_buffer_size,dst_acc_data,1024);
+//    audio_valid_size=audio_acc->encodeAudio((unsigned char*)data,audio_buffer_size,dst_acc_data,1024);
 
     audio_fts++;
-    if (!first_spec){
-        rtmp_tils->add_acc_header(44100,2,0);
-        first_spec= true;
-    }
-    rtmp_tils->add_acc_body(dst_acc_data,audio_valid_size,audio_fts);
+//    if (!first_spec){
+//        rtmp_tils->add_acc_header(44100,2,0);
+//        first_spec= true;
+//    }
+//    rtmp_tils->add_acc_body(dst_acc_data,audio_valid_size,audio_fts);
 
     free(dst_acc_data);
     dst_acc_data=NULL;

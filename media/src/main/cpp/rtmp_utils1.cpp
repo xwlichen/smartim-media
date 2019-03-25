@@ -2,7 +2,7 @@
  * @date : 2019/3/14 下午6:40
  * @author: lichen
  * @email : 1960003945@qq.com
- * @description : 
+ * @description :
  */
 //
 #include "rtmp_utils.h"
@@ -116,6 +116,7 @@ void RtmpUtils::add_x264_data(x264_nal_t *nal, int nal_num) {
     int i = 0;
     //0x00 0x00 0x01）  0x00 0x00 0x00 0x01   都是视频帧（NALU数据单元）之间的间隔标识
     for (; i < nal_num; ++i) {
+        LOGE(JNI_DEBUG,"nal[i].i_type=%d",nal[i].i_type);
         if (nal[i].i_type == NAL_SPS) {//sps
             sps_len = nal[i].i_payload - 4;
             memcpy(sps, nal[i].p_payload + 4, (size_t) sps_len);
@@ -203,7 +204,7 @@ RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, i
 
     add_packet(packet);
 
-    free(packet);
+//    free(packet);
 
 }
 
@@ -218,8 +219,6 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
         buf += 3;
         len -= 3;
     }
-
-
     int body_size = len + 9;
     RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 9 + len);
     memset(packet, 0, RTMP_HEAD_SIZE);
@@ -264,11 +263,9 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
     //记录了每一个tag相对于第一个tag（File Header）的相对时间
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
 
-
     add_packet(packet);
 
-    free(packet);
-
+//    free(packet);
 }
 
 
@@ -357,7 +354,7 @@ void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
         RTMP_SendPacket(rtmp, packet, TRUE);
         //LOGD("send packet sendAacSpec");
     }
-    free(packet);
+//    free(packet);
 }
 
 /**
@@ -395,7 +392,7 @@ void RtmpUtils::add_acc_body(unsigned char *buf, int len, long timeStamp) {
         RTMP_SendPacket(rtmp, packet, TRUE);
         //LOGD("send packet sendAccBody");
     }
-    free(packet);
+//    free(packet);
 }
 
 
@@ -423,22 +420,21 @@ void *push_thread(void *args) {
 //    add_aac_header();
     //循环推流
     while (is_pushing) {
-        if (frame_queue.empty()) {
-            continue;
-        }
         RTMPPacket *packet;
         frame_queue.wait_and_pop(packet);
 
         if (packet) {
-            LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
+//            LOGE(JNI_DEBUG, "RTMP_SendPacket m_nTimeStamp: %d", packet->m_nTimeStamp);
 
             //发送rtmp包，true代表rtmp内部有缓存
             int code;
 
             code = RTMP_SendPacketWithCode(rtmp, packet, TRUE);
-
-
             LOGE(JNI_DEBUG, "RTMP_SendPacket code: %d", code);
+            RTMPPacket_Free(packet);
+
+
+
             on_error(code);
 
 //                if (!ret) {
