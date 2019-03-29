@@ -8,11 +8,14 @@
 
 #include <jni.h>
 #include <string>
+#include <thread>
 #include "log.h"
 #include "frame_x264.h"
 #include "audio_acc.h"
 #include "rtmp_utils.h"
 #include "img_utils.h"
+
+using namespace std;
 
 
 extern "C" {
@@ -123,7 +126,6 @@ Java_com_smart_im_media_bridge_LiveBridge_pushVideoData(JNIEnv *env, jobject ins
 
     rtmp_tils->add_x264_data(frame_x264->get_x264_nal_t(), nal_num);
 
-
     free(dst_i420_data);
     dst_i420_data = NULL;
     env->ReleaseByteArrayElements(data_, data, 0);
@@ -143,8 +145,8 @@ Java_com_smart_im_media_bridge_LiveBridge_pushAudioData(JNIEnv *env, jobject ins
         rtmp_tils->add_acc_header(44100,2,0);
         first_spec= true;
     }
-    rtmp_tils->add_acc_body(dst_acc_data,audio_valid_size,audio_fts);
 
+    rtmp_tils->add_acc_body(dst_acc_data,audio_valid_size,audio_fts);
     free(dst_acc_data);
     dst_acc_data=NULL;
 
