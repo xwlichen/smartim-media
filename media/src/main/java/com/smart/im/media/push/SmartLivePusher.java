@@ -87,7 +87,7 @@ public class SmartLivePusher implements ILivePusher {
     @Override
     public void stopPush() {
         videoPusher.stopPush();
-        audioPusher.stopPush();
+//        audioPusher.stopPush();
     }
 
 

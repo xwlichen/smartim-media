@@ -9,6 +9,7 @@ import com.smart.im.media.bean.LivePushConfig;
 import com.smart.im.media.bridge.LiveBridge;
 import com.smart.im.media.utils.CameraUtil;
 
+import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -20,18 +21,21 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.PreviewCallback {
 
     private SurfaceView surfaceView;
-    private Camera camera;
     private boolean isPushing = false;
 
     private CameraUtil cameraUtil;
     private LiveBridge liveBridge;
 
-
+    //阻塞线程安全队列，生产者和消费者
+    private LinkedBlockingQueue<byte[]> mQueue = new LinkedBlockingQueue<>();
+    private Thread workThread;
 
 
     public VideoPusher(LiveBridge liveBridge) {
         this.liveBridge = liveBridge;
         cameraUtil = new CameraUtil();
+//        initWorkThread();
+//        workThread.start();
 
     }
 
@@ -39,17 +43,13 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         if (isPushing) {
-            if (data!=null) {
+            if (data != null) {
+
                 liveBridge.pushVideoData(data);
+
+
             }
 
-//            if (data != null) {
-//                try {
-//                    mQueue.put(data);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
         }
 
     }
@@ -130,6 +130,25 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
     }
 
 
+    public void initWorkThread() {
+        if (workThread == null) {
+            workThread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        if (isPushing) {
+                            byte[] data = mQueue.take();
+                            liveBridge.pushVideoData(data);
+                        }
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            };
+        }
+    }
 
 
 }

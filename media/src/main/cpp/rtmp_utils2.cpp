@@ -34,6 +34,7 @@ jobject jobject_error;
 int is_pushing = FALSE;
 int start_time;
 RTMP *rtmp;
+threadsafe_queue<RTMPPacket *> frame_queue;
 
 RtmpUtils::RtmpUtils() {
 }
@@ -203,11 +204,66 @@ RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, i
 
     add_packet(packet);
 
-//  sendPacket(packet);
+//    free(packet);
 
 }
 
 void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
+//    //去掉起始码(界定符)
+//    if (buf[2] == 0x00) {
+//        //00 00 00 01
+//        buf += 4;
+//        len -= 4;
+//    } else if (buf[2] == 0x01) {
+//        // 00 00 01
+//        buf += 3;
+//        len -= 3;
+//    }
+//    int body_size = len + 9;
+//    RTMPPacket *packet = (RTMPPacket *) malloc(RTMP_HEAD_SIZE + 9 + len);
+//    memset(packet, 0, RTMP_HEAD_SIZE);
+//    packet->m_body = (char *) packet + RTMP_HEAD_SIZE;
+//
+//    unsigned char *body = (unsigned char *) packet->m_body;
+//    //当NAL头信息中，type（5位）等于5，说明这是关键帧NAL单元
+//    //buf[0] NAL Header与运算，获取type，根据type判断关键帧和普通帧
+//    //00000101 & 00011111(0x1f) = 00000101
+//    int type = buf[0] & 0x1f;
+//    //Pframe  7:AVC
+//    body[0] = 0x27;
+//    //IDR I帧图像
+//    //Iframe  7:AVC
+//    if (type == NAL_SLICE_IDR) {
+//        body[0] = 0x17;
+//    }
+//    //AVCPacketType = 1
+//    /*nal unit,NALUs（AVCPacketType == 1)*/
+//    body[1] = 0x01;
+//    //composition time 0x000000 24bit
+//    body[2] = 0x00;
+//    body[3] = 0x00;
+//    body[4] = 0x00;
+//
+//    //写入NALU信息，右移8位，一个字节的读取
+//    body[5] = (len >> 24) & 0xff;
+//    body[6] = (len >> 16) & 0xff;
+//    body[7] = (len >> 8) & 0xff;
+//    body[8] = (len) & 0xff;
+//
+//    /*copy data*/
+//    memcpy(&body[9], buf, len);
+//
+//    packet->m_hasAbsTimestamp = 0;
+//    packet->m_nBodySize = body_size;
+//    //当前packet的类型：Video
+//    packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
+//    packet->m_nChannel = 0x04;
+//    packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
+//    packet->m_nInfoField2 = rtmp->m_stream_id;
+//    //记录了每一个tag相对于第一个tag（File Header）的相对时间
+//    packet->m_nTimeStamp = RTMP_GetTime() - start_time;
+//
+//    add_packet(packet);
 
     if(buf[2] == 0x01){//00 00 01
         buf += 3;
@@ -244,12 +300,8 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
     packet->m_nChannel = 0x04;
     packet->m_packetType = RTMP_PACKET_TYPE_VIDEO;
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
-    LOGE(JNI_DEBUG,"h264 m_nTimeStamp = %d", packet->m_nTimeStamp);
-
 
     add_packet(packet);
-//    sendPacket(packet);
-
 }
 
 
@@ -340,8 +392,12 @@ void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
 
     add_packet(packet);
 
-//   sendPacket(packet);
-
+//    //send rtmp aac head
+//    if (RTMP_IsConnected(rtmp)) {
+//        RTMP_SendPacket(rtmp, packet, TRUE);
+//        //LOGD("send packet sendAacSpec");
+//    }
+//    free(packet);
 }
 
 /**
@@ -371,12 +427,17 @@ void RtmpUtils::add_acc_body(unsigned char *buf, int len, long timeStamp) {
     packet->m_hasAbsTimestamp = 0;
     packet->m_headerType = RTMP_PACKET_SIZE_LARGE;
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
-//    LOGE(JNI_DEBUG,"aac m_nTimeStamp = %d", packet->m_nTimeStamp);
+    LOGE(JNI_DEBUG,"aac m_nTimeStamp = %d", packet->m_nTimeStamp);
     packet->m_nInfoField2 = rtmp->m_stream_id;
 
     add_packet(packet);
-//    sendPacket(packet);
 
+//    //send rtmp aac data
+//    if (RTMP_IsConnected(rtmp)) {
+//        RTMP_SendPacket(rtmp, packet, TRUE);
+//        //LOGD("send packet sendAccBody");
+//    }
+//    free(packet);
 }
 
 
@@ -458,18 +519,7 @@ void RtmpUtils::init_thread() {
 //    pthread_t push_thread_id;
 //    //创建消费线程推流
 //    pthread_create(&push_thread_id, NULL, push_thread, this);
-
 }
-
-void RtmpUtils:: sendPacket(RTMPPacket * packet){
-    //send rtmp
-    if (RTMP_IsConnected(rtmp)) {
-        RTMP_SendPacket(rtmp, packet, TRUE);
-        //LOGD("send packet sendSpsAndPps");
-    }
-    free(packet);
-}
-
 
 
 

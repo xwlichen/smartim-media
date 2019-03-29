@@ -59,6 +59,8 @@ public :
 
     void add_packet(RTMPPacket *rtmpPacket);
 
+    void sendPacket(RTMPPacket * packet);
+
     void init_thread();
 
 //    void on_error(int code);

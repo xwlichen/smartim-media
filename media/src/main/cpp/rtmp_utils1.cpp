@@ -416,8 +416,6 @@ void *push_thread(void *args) {
     LOGI(JNI_DEBUG, "RTMP_ConnectStream success...");
 
     is_pushing = TRUE;
-    //发送一个ACC HEADER
-//    add_aac_header();
     //循环推流
     while (is_pushing) {
         RTMPPacket *packet;
