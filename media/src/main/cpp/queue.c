@@ -104,6 +104,24 @@ void* queue_get_last() {
 	return queue_get(count - 1);
 }
 
+
+/**
+ * 插入到链表头
+ * @param pval
+ * @return 是否插入成功
+ */
+int queue_insert_first(void *pval) {
+	node *pnode = create_node(pval);
+	if (!pnode)
+		return -1;
+	pnode->prev = phead;
+	pnode->next = phead->next;
+	phead->next->prev = pnode;
+	phead->next = pnode;
+	count++;
+	return 0;
+}
+
 /**
  * 插入到index位置
  * @param index index
@@ -131,22 +149,7 @@ int queue_insert(int index, void* pval) {
 	return 0;
 }
 
-/**
- * 插入到链表头
- * @param pval
- * @return 是否插入成功
- */
-int queue_insert_first(void *pval) {
-	node *pnode = create_node(pval);
-	if (!pnode)
-		return -1;
-	pnode->prev = phead;
-	pnode->next = phead->next;
-	phead->next->prev = pnode;
-	phead->next = pnode;
-	count++;
-	return 0;
-}
+
 
 /**
  * 插入链表尾

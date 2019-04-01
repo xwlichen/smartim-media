@@ -7,6 +7,7 @@
 //
 #include "rtmp_utils.h"
 #include "log.h"
+
 #include <jni.h>
 #include <stdint.h>
 #include <malloc.h>
@@ -33,6 +34,11 @@ jobject jobject_error;
 int is_pushing = FALSE;
 int start_time;
 RTMP *rtmp;
+
+
+
+
+
 
 RtmpUtils::RtmpUtils() {
 }
@@ -100,8 +106,12 @@ void RtmpUtils::init(unsigned char *url) {
         LOGE(JNI_DEBUG, "RTMP_ConnectStream success");
     }
     start_time = RTMP_GetTime();
+
     LOGE(JNI_DEBUG, "start_time = %d", start_time);
 }
+
+
+
 
 void RtmpUtils::add_x264_data(x264_nal_t *nal, int nal_num) {
     //使用RTMP推流
@@ -181,7 +191,8 @@ RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, i
     //numOfPictureParameterSets一般为1，即为0x01
     body[i++] = 0x01;
     //SequenceParametersSetNALUnits（pps_size + pps）的数组
-    body[i++] = (pps_len >> 8) & 0xff;
+    body[i++] = (pps_len >> 8) &
+            0xff;
     body[i++] = (pps_len) & 0xff;
     memcpy(&body[i], pps, pps_len);
     i += pps_len;
@@ -199,6 +210,7 @@ RtmpUtils::add_264_header(unsigned char *sps, int sps_len, unsigned char *pps, i
     packet->m_nChannel = 0x04;
     packet->m_headerType = RTMP_PACKET_SIZE_MEDIUM;
     packet->m_nInfoField2 = rtmp->m_stream_id;
+
 
     add_packet(packet);
 
@@ -245,6 +257,7 @@ void RtmpUtils::add_x264_body(uint8_t *buf, int len) {
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
     LOGE(JNI_DEBUG,"h264 m_nTimeStamp = %d", packet->m_nTimeStamp);
 
+//    rtmpVideo->add_video_packet(packet);
 
     add_packet(packet);
 //    sendPacket(packet);
@@ -337,6 +350,8 @@ void RtmpUtils::add_acc_header(int sampleRate, int channel, int timestamp) {
     packet->m_nInfoField2 = rtmp->m_stream_id;
 
 
+//    rtmpAudio->add_audio_packet(packet);
+
     add_packet(packet);
 
 //   sendPacket(packet);
@@ -372,6 +387,8 @@ void RtmpUtils::add_acc_body(unsigned char *buf, int len, long timeStamp) {
     packet->m_nTimeStamp = RTMP_GetTime() - start_time;
 //    LOGE(JNI_DEBUG,"aac m_nTimeStamp = %d", packet->m_nTimeStamp);
     packet->m_nInfoField2 = rtmp->m_stream_id;
+
+//    rtmpAudio->add_audio_packet(packet);
 
     add_packet(packet);
 //    sendPacket(packet);

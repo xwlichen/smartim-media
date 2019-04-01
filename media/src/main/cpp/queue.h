@@ -1,7 +1,7 @@
 #ifndef _QUQEUE_H
 #define _QUQEUE_H
 // 新建“双向链表”。成功，返回表头；否则，返回NULL
-extern int create_queue();
+ extern int create_queue();
 // 撤销“双向链表”。成功，返回0；否则，返回-1
 extern int destroy_queue();
 // “双向链表是否为空”。为空的话返回1；否则，返回0。

@@ -47,7 +47,12 @@ add_library( # Sets the name of the library.
         src/main/cpp/img_utils.cpp
         src/main/cpp/rtmp_utils.cpp
         src/main/cpp/queue.c
-        src/main/cpp/thread_safe_queue.cpp
+#        src/main/cpp/thread_safe_queue.cpp
+
+#        src/main/cpp/queue_utils.cpp
+#        src/main/cpp/rtmp_audio.cpp
+#        src/main/cpp/rtmp_video.cpp
+
 
 
         src/main/cpp/librtmp/amf.c
