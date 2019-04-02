@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 @Override
                                 public void onHasPermission() {
-                                    startActivity(new Intent(MainActivity.this, LiveActivity.class));
+                                    startActivity(new Intent(MainActivity.this, LiveTextureActivity.class));
 
                                 }
                             });

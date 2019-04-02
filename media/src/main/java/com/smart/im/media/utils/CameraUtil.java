@@ -205,7 +205,7 @@ public class CameraUtil {
     }
 
     public void startPreview(SurfaceHolder surfaceHolder, Camera.PreviewCallback callback) {
-        camera.setPreviewCallback(callback);
+        camera.setPreviewCallbackWithBuffer(callback);
         try {
             camera.setPreviewDisplay(surfaceHolder);
         } catch (IOException e) {

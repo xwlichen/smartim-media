@@ -34,6 +34,9 @@
 
         <activity android:name=".LiveActivity"
             android:configChanges="orientation|screenSize"/>
+
+        <activity android:name=".LiveTextureActivity"
+            android:configChanges="orientation|screenSize"/>
     </application>
 
 </manifest>
