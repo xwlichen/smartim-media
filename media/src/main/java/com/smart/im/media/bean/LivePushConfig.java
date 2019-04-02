@@ -1,5 +1,6 @@
 package com.smart.im.media.bean;
 
+import android.hardware.Camera;
 import android.media.AudioFormat;
 
 /**
@@ -9,6 +10,10 @@ import android.media.AudioFormat;
  * @description :
  */
 public class LivePushConfig {
+
+    public static  final  int MODE_HARD=1; //硬编码
+    public static  final  int MODE_SOFT=2; //软编码
+
 
     private String url;
 
@@ -22,6 +27,9 @@ public class LivePushConfig {
     private int audioBitRate=64000;
     private int channelConfig = AudioFormat.CHANNEL_IN_STEREO;//立体声道
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;//pcm16位
+
+    private int cameraType= Camera.CameraInfo.CAMERA_FACING_FRONT;
+    private int endcoderType=MODE_HARD;
 
     public LivePushConfig() {
     }

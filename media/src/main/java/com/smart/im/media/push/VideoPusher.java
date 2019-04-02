@@ -1,9 +1,12 @@
 package com.smart.im.media.push;
 
 import android.content.Context;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
+import android.view.View;
 
 import com.smart.im.media.bean.LivePushConfig;
 import com.smart.im.media.bridge.LiveBridge;
@@ -18,9 +21,10 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @email : 1960003945@qq.com
  * @description :
  */
-public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.PreviewCallback {
+public class VideoPusher implements ILivePusher {
 
     private SurfaceView surfaceView;
+    private TextureView textureView;
     private boolean isPushing = false;
 
     private CameraUtil cameraUtil;
@@ -40,34 +44,6 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
     }
 
 
-    @Override
-    public void onPreviewFrame(byte[] data, Camera camera) {
-        if (isPushing) {
-            if (data != null) {
-
-                liveBridge.pushVideoData(data);
-
-
-            }
-
-        }
-
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        cameraUtil.startPreview(surfaceView.getHolder(), this);
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-
-    }
 
 
     @Override
@@ -80,12 +56,57 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
 
     }
 
-    public void startPreview(SurfaceView surfaceView) {
-        this.surfaceView = surfaceView;
-        cameraUtil.setContext(surfaceView.getContext());
+    public void startPreview(View view) {
+
+        cameraUtil.setContext(view.getContext());
         cameraUtil.initCamera(Camera.CameraInfo.CAMERA_FACING_FRONT);
-        cameraUtil.startPreview(surfaceView.getHolder(), this);
-        surfaceView.getHolder().addCallback(this);
+
+        if (view instanceof SurfaceView) {
+            this.surfaceView = (SurfaceView) view;
+            this.surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+                @Override
+                public void surfaceCreated(SurfaceHolder holder) {
+
+                }
+
+                @Override
+                public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+                }
+
+                @Override
+                public void surfaceDestroyed(SurfaceHolder holder) {
+
+                }
+            });
+        } else if (view instanceof TextureView) {
+            this.textureView = (TextureView) view;
+            this.textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+                @Override
+                public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+
+                }
+
+                @Override
+                public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+                }
+
+                @Override
+                public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                    return false;
+                }
+
+                @Override
+                public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+                }
+            });
+
+        }
+
+        cameraUtil.startPreview(surfaceView.getHolder(), new );
+
     }
 
 
@@ -150,5 +171,16 @@ public class VideoPusher implements ILivePusher, SurfaceHolder.Callback, Camera.
         }
     }
 
+
+//
+//    if (isPushing) {
+//        if (data != null) {
+//
+//            liveBridge.pushVideoData(data);
+//
+//
+//        }
+//
+//    }
 
 }

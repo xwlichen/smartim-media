@@ -3,10 +3,13 @@ package com.smart.im.media.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.view.TextureView;
+import android.view.View;
 
 import java.io.IOException;
 import java.util.List;
@@ -207,6 +210,21 @@ public class CameraUtil {
             camera.setPreviewDisplay(surfaceHolder);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        camera.startPreview();
+        isStartPreview = true;
+        isFocusing = false;
+        //进行一次自动对焦
+        startAutoFocus();
+    }
+
+
+    public void startPreview(SurfaceTexture surfaceTexture) {
+        try {
+            camera.setPreviewTexture(surfaceTexture);
+        } catch (IOException e) {
+            e.printStackTrace();
+            camera.release();
         }
         camera.startPreview();
         isStartPreview = true;

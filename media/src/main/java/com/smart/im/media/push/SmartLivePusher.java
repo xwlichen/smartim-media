@@ -2,6 +2,7 @@ package com.smart.im.media.push;
 
 import android.content.Context;
 import android.view.SurfaceView;
+import android.view.View;
 
 import com.smart.im.media.bean.LivePushConfig;
 import com.smart.im.media.bridge.LiveBridge;
@@ -33,7 +34,7 @@ public class SmartLivePusher implements ILivePusher {
         this.context = context;
 
         liveBridge = new LiveBridge();
-        videoPusher = new VideoPusher(liveBridge);
+//        videoPusher = new VideoPusher(liveBridge);
         audioPusher = new AudioPusher(liveBridge);
 
         liveBridge.initLivePushConfig(config);
@@ -44,7 +45,7 @@ public class SmartLivePusher implements ILivePusher {
 
     }
 
-    public void startPreview(SurfaceView surfaceView) {
+    public void startPreview(View surfaceView) {
         videoPusher.startPreview(surfaceView);
     }
 
