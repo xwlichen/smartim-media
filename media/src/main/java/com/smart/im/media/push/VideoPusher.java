@@ -201,7 +201,7 @@ public class VideoPusher implements ILivePusher {
         cameraTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
             @Override
             public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                Log.e(TAG,)
+//                Log.e(TAG,);
 
             }
         });
