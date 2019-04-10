@@ -4,6 +4,7 @@ import android.hardware.Camera;
 import android.media.AudioFormat;
 
 import com.smart.im.media.enums.EncodeEnum;
+import com.smart.im.media.enums.FpsEnum;
 
 /**
  * @date : 2019/3/14 下午4:10
@@ -11,15 +12,18 @@ import com.smart.im.media.enums.EncodeEnum;
  * @email : 1960003945@qq.com
  * @description :
  */
-public class LivePushConfig {
+public class PushConfig {
 
 
     private String url;
 
     private int width = 640;//分辨率设置很重要
     private int height = 480;
+    private int previewWidth;
+    private int previewHeight;
+
     private int bitRate = 1500;//kb/s jason-->480kb
-    private int frameRate = 25;//fps
+    private FpsEnum fps;//fps
 
     private int sampleRate = 44100;//采样率：Hz
     /**
@@ -33,14 +37,13 @@ public class LivePushConfig {
     private int cameraType = Camera.CameraInfo.CAMERA_FACING_FRONT;
     private EncodeEnum endcoderType = EncodeEnum.HARD;
 
-    public LivePushConfig() {
+    public PushConfig() {
     }
 
-    public LivePushConfig(int width, int height, int bitRate, int frameRate, int sampleRate, int channelConfig, int audioFormat, int numChannels) {
+    public PushConfig(int width, int height, int bitRate, int sampleRate, int channelConfig, int audioFormat, int numChannels) {
         this.width = width;
         this.height = height;
         this.bitRate = bitRate;
-        this.frameRate = frameRate;
         this.sampleRate = sampleRate;
         this.channelConfig = channelConfig;
         this.audioFormat = audioFormat;
@@ -79,12 +82,12 @@ public class LivePushConfig {
         this.bitRate = bitRate;
     }
 
-    public int getFrameRate() {
-        return frameRate;
+    public FpsEnum getFps() {
+        return fps;
     }
 
-    public void setFrameRate(int frameRate) {
-        this.frameRate = frameRate;
+    public void setFps(FpsEnum fps) {
+        this.fps = fps;
     }
 
     public int getSampleRate() {
@@ -125,5 +128,29 @@ public class LivePushConfig {
 
     public void setAudioFormat(int audioFormat) {
         this.audioFormat = audioFormat;
+    }
+
+    public int getPreviewWidth() {
+        return previewWidth;
+    }
+
+    public void setPreviewWidth(int previewWidth) {
+        this.previewWidth = previewWidth;
+    }
+
+    public int getPreviewHeight() {
+        return previewHeight;
+    }
+
+    public void setPreviewHeight(int previewHeight) {
+        this.previewHeight = previewHeight;
+    }
+
+    public EncodeEnum getEndcoderType() {
+        return endcoderType;
+    }
+
+    public void setEndcoderType(EncodeEnum endcoderType) {
+        this.endcoderType = endcoderType;
     }
 }

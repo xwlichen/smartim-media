@@ -1,9 +1,8 @@
 package com.smart.im.media.push;
 
 import android.content.Context;
-import android.view.SurfaceView;
 
-import com.smart.im.media.bean.LivePushConfig;
+import com.smart.im.media.bean.PushConfig;
 
 /**
  * @date : 2019/3/12 下午3:51
@@ -13,7 +12,7 @@ import com.smart.im.media.bean.LivePushConfig;
  */
 public interface  ILivePusher {
 
-    void init(Context context, LivePushConfig livePushConfig);
+    void init(Context context, PushConfig pushConfig);
 
     void destroy();
 

@@ -14,5 +14,5 @@ public enum EncodeEnum {
     /**
      * 软编码
      */
-    SOFT,
+    SOFT;
 }

@@ -3,17 +3,19 @@ package com.smart.im.media.push;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 
-import com.smart.im.media.bean.LivePushConfig;
+import com.blankj.utilcode.util.LogUtils;
+import com.smart.im.media.bean.ESConfig;
+import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
 import com.smart.im.media.utils.CameraUtil;
+import com.smart.im.media.video.ESVideoClient;
+import com.smart.im.media.video.ESVideoCore;
 
-import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -33,25 +35,28 @@ public class VideoPusher implements ILivePusher {
     private SurfaceTexture cameraTexture;
     private boolean isPushing = false;
 
-    private CameraUtil cameraUtil;
     private LiveBridge liveBridge;
 
-    //阻塞线程安全队列，生产者和消费者
-    private LinkedBlockingQueue<byte[]> mQueue = new LinkedBlockingQueue<>();
-    private Thread workThread;
+    private ESVideoClient esVideoClient;
+
+
 
 
     public VideoPusher(LiveBridge liveBridge) {
         this.liveBridge = liveBridge;
-        cameraUtil = new CameraUtil();
-//        initWorkThread();
-//        workThread.start();
+
 
     }
 
 
     @Override
-    public void init(Context context, LivePushConfig livePushConfig) {
+    public void init(Context context, PushConfig pushConfig) {
+        ESConfig esConfig=new ESConfig();
+        esVideoClient=new ESVideoClient(pushConfig);
+        if (!esVideoClient.prepare()){
+            LogUtils.e("!!!!! ESVideoClient prepare() failed !!!!");
+            return;
+        }
 
     }
 
@@ -108,6 +113,7 @@ public class VideoPusher implements ILivePusher {
 
     }
 
+
     @Override
     public void reconnectPushAsync(String url) {
 
@@ -120,25 +126,6 @@ public class VideoPusher implements ILivePusher {
     }
 
 
-    public void initWorkThread() {
-        if (workThread == null) {
-            workThread = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        if (isPushing) {
-                            byte[] data = mQueue.take();
-                            liveBridge.pushVideoData(data);
-                        }
-
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            };
-        }
-    }
 
 
     public void initSurface() {
@@ -209,6 +196,10 @@ public class VideoPusher implements ILivePusher {
         cameraUtil.startPreview(cameraTexture);
 
 
+    }
+
+
+    public void buildESConfig() {
     }
 
 }

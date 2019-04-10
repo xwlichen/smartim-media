@@ -1,6 +1,6 @@
 package com.smart.im.media.bridge;
 
-import com.smart.im.media.bean.LivePushConfig;
+import com.smart.im.media.bean.PushConfig;
 
 /**
  * @date : 2019/3/12 下午4:15
@@ -28,7 +28,7 @@ public class LiveBridge {
     public native void pushAudioData(byte[] data);
 
 
-    public void initLivePushConfig(LivePushConfig config) {
+    public void initLivePushConfig(PushConfig config) {
         if (config == null) {
             throw new IllegalArgumentException("config cann't be null");
         }

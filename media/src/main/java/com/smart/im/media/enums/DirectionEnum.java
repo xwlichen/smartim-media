@@ -30,5 +30,5 @@ public enum  DirectionEnum {
     /**
      * 旋转270度
      */
-    ROTATION_270,
+    ROTATION_270;
 }

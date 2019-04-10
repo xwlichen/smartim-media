@@ -13,9 +13,8 @@ public interface ESVideoCore {
     int OVERWATCH_TEXTURE_ID = 10;
 
     /**
-     *
-     * @param config
+
      */
-    void prepare(ESConfig config);
+    boolean prepare();
 
 }

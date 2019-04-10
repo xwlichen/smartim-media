@@ -1,9 +1,8 @@
 package com.smart.im.media.push;
 
 import android.content.Context;
-import android.view.SurfaceView;
 
-import com.smart.im.media.bean.LivePushConfig;
+import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
 import com.smart.im.media.inter.AudioDataListener;
 import com.smart.im.media.manager.AudioRecordManager;
@@ -29,7 +28,7 @@ public class AudioPusher implements ILivePusher, AudioDataListener {
     }
 
     @Override
-    public void init(Context context, LivePushConfig livePushConfig) {
+    public void init(Context context, PushConfig pushConfig) {
 
     }
 

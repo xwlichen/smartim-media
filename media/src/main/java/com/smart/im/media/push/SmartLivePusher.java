@@ -4,7 +4,7 @@ import android.content.Context;
 import android.view.SurfaceView;
 import android.view.View;
 
-import com.smart.im.media.bean.LivePushConfig;
+import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
 
 /**
@@ -19,7 +19,7 @@ public class SmartLivePusher implements ILivePusher {
     private AudioPusher audioPusher;
     private LiveBridge liveBridge;
 
-    private LivePushConfig config;
+    private PushConfig config;
     private Context context;
 
 
@@ -29,7 +29,7 @@ public class SmartLivePusher implements ILivePusher {
 
 
     @Override
-    public void init(Context context, LivePushConfig config) {
+    public void init(Context context, PushConfig config) {
         this.config = config;
         this.context = context;
 
@@ -38,6 +38,8 @@ public class SmartLivePusher implements ILivePusher {
         audioPusher = new AudioPusher(liveBridge);
 
         liveBridge.initLivePushConfig(config);
+        videoPusher.init(context,config);
+        audioPusher.init(context,config);
     }
 
     @Override
