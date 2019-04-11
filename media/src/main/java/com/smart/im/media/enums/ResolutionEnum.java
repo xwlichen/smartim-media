@@ -41,43 +41,43 @@ public enum ResolutionEnum {
 
     }
 
-    public static int GetResolutionWidth(ResolutionEnum var0) {
-        if (var0.equals(RESOLUTION_180P)) {
+    public static int getResolutionWidth(ResolutionEnum resolution) {
+        if (resolution.equals(RESOLUTION_180P)) {
             return 192;
-        } else if (var0.equals(RESOLUTION_240P)) {
+        } else if (resolution.equals(RESOLUTION_240P)) {
             return 240;
-        } else if (var0.equals(RESOLUTION_360P)) {
+        } else if (resolution.equals(RESOLUTION_360P)) {
             return 368;
-        } else if (var0.equals(RESOLUTION_480P)) {
+        } else if (resolution.equals(RESOLUTION_480P)) {
             return 480;
-        } else if (var0.equals(RESOLUTION_540P)) {
+        } else if (resolution.equals(RESOLUTION_540P)) {
             return 544;
-        } else if (var0.equals(RESOLUTION_720P)) {
+        } else if (resolution.equals(RESOLUTION_720P)) {
             return 720;
-        } else if (var0.equals(RESOLUTION_1080P)) {
+        } else if (resolution.equals(RESOLUTION_1080P)) {
             return 1088;
         } else {
-            return var0.equals(RESOLUTION_SELFDEFINE) ? var0.mSelfDefineWidth : 192;
+            return resolution.equals(RESOLUTION_SELFDEFINE) ? resolution.mSelfDefineWidth : 192;
         }
     }
 
-    public static int GetResolutionHeight(ResolutionEnum var0) {
-        if (var0.equals(RESOLUTION_180P)) {
+    public static int getResolutionHeight(ResolutionEnum resolution) {
+        if (resolution.equals(RESOLUTION_180P)) {
             return 320;
-        } else if (var0.equals(RESOLUTION_240P)) {
+        } else if (resolution.equals(RESOLUTION_240P)) {
             return 320;
-        } else if (var0.equals(RESOLUTION_360P)) {
+        } else if (resolution.equals(RESOLUTION_360P)) {
             return 640;
-        } else if (var0.equals(RESOLUTION_480P)) {
+        } else if (resolution.equals(RESOLUTION_480P)) {
             return 640;
-        } else if (var0.equals(RESOLUTION_540P)) {
+        } else if (resolution.equals(RESOLUTION_540P)) {
             return 960;
-        } else if (var0.equals(RESOLUTION_720P)) {
+        } else if (resolution.equals(RESOLUTION_720P)) {
             return 1280;
-        } else if (var0.equals(RESOLUTION_1080P)) {
+        } else if (resolution.equals(RESOLUTION_1080P)) {
             return 1920;
         } else {
-            return var0.equals(RESOLUTION_SELFDEFINE) ? var0.mSelfDefineHeight : 320;
+            return resolution.equals(RESOLUTION_SELFDEFINE) ? resolution.mSelfDefineHeight : 320;
         }
     }
 

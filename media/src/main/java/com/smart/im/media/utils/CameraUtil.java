@@ -64,45 +64,30 @@ public class CameraUtil {
      * @param parms
      * @param width
      * @param height
-     * @param model  1-预览  2-输出
      */
-    private void chooseCameraSize(Camera.Parameters parms, int width, int height, int model) {
+    public  static Camera.Size  choosePreviewSize(Camera.Parameters parms, int width, int height) {
         //先判断是否支持该分辨率
-        Camera.Size maxSize = null;
+        Camera.Size resultSize = null;
         for (Camera.Size size : parms.getSupportedPreviewSizes()) {
-            Log.e("xw", size.width +"*"+ size.height + "");
-            //满足16:9的才进行使用并且小于等于width的才进行使用
-            if (size.width * height == size.height * width && size.width <= width) {
-                if (maxSize == null) {
-                    maxSize = size;
-                } else if (maxSize.width < size.width) {
-                    maxSize = size;
-                }
-            }
+
             if (size.width == width && size.height == height) {
-                if (model == 1) {
-                    parms.setPreviewSize(width, height);
-                } else if (model == 2) {
-                    parms.setPictureSize(width, height);
-                }
-                return;
-            }
-        }
-        if (maxSize != null) {  //如果存在maxSize的话就采用maxSize
-            if (model == 1) {
-                parms.setPreviewSize(maxSize.width, maxSize.height);
-            } else if (model == 2) {
-                parms.setPictureSize(maxSize.width, maxSize.height);
+                resultSize = size;
+                break;
             }
 
-        } else {  //如果没有16:9的话就采用默认的
-            Camera.Size ppsfv = parms.getPreferredPreviewSizeForVideo();
-            if (model == 1) {
-                parms.setPreviewSize(ppsfv.width, ppsfv.height);
-            } else if (model == 2) {
-                parms.setPictureSize(ppsfv.width, ppsfv.height);
+            //满足16:9的才进行使用并且小于等于width的才进行使用
+            if (size.width * height == size.height * width && size.width <= width) {
+                if (resultSize == null) {
+                    resultSize = size;
+                } else if (resultSize.width < size.width) {
+                    resultSize = size;
+                }
             }
         }
+        if (resultSize == null) {
+           resultSize = parms.getPreferredPreviewSizeForVideo();
+        }
+        return resultSize;
     }
 
     private int setCameraDisplayRotation(int cameraId) {

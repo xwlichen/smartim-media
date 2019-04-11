@@ -2,6 +2,7 @@ package com.smart.im.media.push;
 
 import android.content.Context;
 import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 
 import com.smart.im.media.bean.PushConfig;
@@ -47,8 +48,8 @@ public class SmartLivePusher implements ILivePusher {
 
     }
 
-    public void startPreview(View view) {
-        videoPusher.startPreview(view);
+    public void startPreview(TextureView textureView) {
+        videoPusher.startPreview(textureView);
     }
 
     public void startPreviewAysnc(SurfaceView surfaceView) {

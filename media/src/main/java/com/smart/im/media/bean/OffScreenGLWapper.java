@@ -18,10 +18,22 @@ public class OffScreenGLWapper {
     public EGLSurface eglSurface;
     public EGLContext eglContext;
 
+    /**
+     * 离屏Camera2D程序
+     */
     public int cam2dProgram;
     public int cam2dTextureMatrix;
+    /**
+     * 离屏程序中的片元着色器的uniform常量uTexture
+     */
     public int cam2dTextureLoc;
+    /**
+     * 离屏程序中的顶点着色器 aPosition（位置坐标）
+     */
     public int cam2dPostionLoc;
+    /**
+     * 离屏程序中的顶点着色器 aTextureCoord（纹理坐标）
+     */
     public int cam2dTextureCoordLoc;
 
     public int camProgram;

@@ -30,16 +30,12 @@ public class VideoPusher implements ILivePusher {
 
     public int OVERWATCH_TEXTURE_ID = 10;
 
-    private SurfaceView surfaceView;
-    private TextureView textureView;
     private SurfaceTexture cameraTexture;
     private boolean isPushing = false;
 
     private LiveBridge liveBridge;
 
     private ESVideoClient esVideoClient;
-
-
 
 
     public VideoPusher(LiveBridge liveBridge) {
@@ -51,9 +47,9 @@ public class VideoPusher implements ILivePusher {
 
     @Override
     public void init(Context context, PushConfig pushConfig) {
-        ESConfig esConfig=new ESConfig();
-        esVideoClient=new ESVideoClient(pushConfig);
-        if (!esVideoClient.prepare()){
+        ESConfig esConfig = new ESConfig();
+        esVideoClient = new ESVideoClient(pushConfig);
+        if (!esVideoClient.prepare()) {
             LogUtils.e("!!!!! ESVideoClient prepare() failed !!!!");
             return;
         }
@@ -65,28 +61,10 @@ public class VideoPusher implements ILivePusher {
 
     }
 
-    public void startPreview(View view) {
-
-        cameraUtil.setContext(view.getContext());
-        cameraUtil.initCamera(Camera.CameraInfo.CAMERA_FACING_FRONT);
-
-        if (view instanceof SurfaceView) {
-            this.surfaceView = (SurfaceView) view;
-            initSurface();
-
-        } else if (view instanceof TextureView) {
-            this.textureView = (TextureView) view;
-            initTexture();
-
-        }
-
-
+    public void startPreview(TextureView textureView) {
+        initTexture(textureView);
     }
 
-
-    public void startPreviewAysnc(SurfaceView surfaceView) {
-
-    }
 
     public void stopPreview() {
 
@@ -126,47 +104,14 @@ public class VideoPusher implements ILivePusher {
     }
 
 
-
-
-    public void initSurface() {
-        if (surfaceView == null) {
-            return;
-        }
-        surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-
-            }
-        });
-
-        cameraUtil.startPreview(surfaceView.getHolder(), new Camera.PreviewCallback() {
-            @Override
-            public void onPreviewFrame(byte[] data, Camera camera) {
-
-            }
-        });
-
-    }
-
-    public void initTexture() {
+    public void initTexture(TextureView textureView) {
         if (textureView == null) {
             return;
         }
-        cameraTexture = new SurfaceTexture(OVERWATCH_TEXTURE_ID);
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-
+                esVideoClient.startPreview(surface, width, height);
             }
 
             @Override
@@ -184,16 +129,6 @@ public class VideoPusher implements ILivePusher {
 
             }
         });
-
-        cameraTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
-            @Override
-            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-//                Log.e(TAG,);
-
-            }
-        });
-
-        cameraUtil.startPreview(cameraTexture);
 
 
     }

@@ -1,5 +1,7 @@
 package com.smart.im.media.video;
 
+import android.graphics.SurfaceTexture;
+
 import com.smart.im.media.bean.ESConfig;
 
 /**
@@ -13,8 +15,19 @@ public interface ESVideoCore {
     int OVERWATCH_TEXTURE_ID = 10;
 
     /**
-
+     * 配置准备
      */
     boolean prepare();
+
+
+    /**
+     * 预览
+     * @param surfaceTexture
+     * @param visualWidth  TextureView的宽
+     * @param visualHeight TextureView的高
+     */
+    void startPreview(SurfaceTexture surfaceTexture, int visualWidth, int visualHeight);
+
+
 
 }

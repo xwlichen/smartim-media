@@ -5,6 +5,7 @@ import android.media.AudioFormat;
 
 import com.smart.im.media.enums.EncodeEnum;
 import com.smart.im.media.enums.FpsEnum;
+import com.smart.im.media.enums.ResolutionEnum;
 
 /**
  * @date : 2019/3/14 下午4:10
@@ -24,6 +25,7 @@ public class PushConfig {
 
     private int bitRate = 1500;//kb/s jason-->480kb
     private FpsEnum fps;//fps
+    private ResolutionEnum resolution; //分辨率
 
     private int sampleRate = 44100;//采样率：Hz
     /**
@@ -36,6 +38,16 @@ public class PushConfig {
 
     private int cameraType = Camera.CameraInfo.CAMERA_FACING_FRONT;
     private EncodeEnum endcoderType = EncodeEnum.HARD;
+
+
+    /**
+     * 是否推流镜像
+     */
+    private boolean pushMirror;
+    /**
+     * 是否预览镜像
+     */
+    private boolean previewMirror;
 
     public PushConfig() {
     }
@@ -152,5 +164,59 @@ public class PushConfig {
 
     public void setEndcoderType(EncodeEnum endcoderType) {
         this.endcoderType = endcoderType;
+    }
+
+    public int getCameraType() {
+        return cameraType;
+    }
+
+    public void setCameraType(int cameraType) {
+        this.cameraType = cameraType;
+    }
+
+    public ResolutionEnum getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(ResolutionEnum resolution) {
+        this.resolution = resolution;
+    }
+
+
+    public boolean isPushMirror() {
+        return pushMirror;
+    }
+
+    public void setPushMirror(boolean pushMirror) {
+        this.pushMirror = pushMirror;
+    }
+
+    public boolean isPreviewMirror() {
+        return previewMirror;
+    }
+
+    public void setPreviewMirror(boolean previewMirror) {
+        this.previewMirror = previewMirror;
+    }
+
+    @Override
+    public String toString() {
+        return "PushConfig{" +
+                "url='" + url + '\'' +
+                ", width=" + width +
+                ", height=" + height +
+                ", previewWidth=" + previewWidth +
+                ", previewHeight=" + previewHeight +
+                ", bitRate=" + bitRate +
+                ", fps=" + fps +
+                ", resolution=" + resolution +
+                ", sampleRate=" + sampleRate +
+                ", numChannels=" + numChannels +
+                ", audioBitRate=" + audioBitRate +
+                ", channelConfig=" + channelConfig +
+                ", audioFormat=" + audioFormat +
+                ", cameraType=" + cameraType +
+                ", endcoderType=" + endcoderType +
+                '}';
     }
 }
