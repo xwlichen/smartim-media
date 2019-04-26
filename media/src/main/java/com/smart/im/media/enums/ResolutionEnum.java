@@ -42,19 +42,19 @@ public enum ResolutionEnum {
     }
 
     public static int getResolutionWidth(ResolutionEnum resolution) {
-        if (resolution.equals(RESOLUTION_180P)) {
+        if (RESOLUTION_180P.equals(resolution)) {
             return 192;
-        } else if (resolution.equals(RESOLUTION_240P)) {
+        } else if (RESOLUTION_240P.equals(resolution)) {
             return 240;
-        } else if (resolution.equals(RESOLUTION_360P)) {
+        } else if (RESOLUTION_360P.equals(resolution)) {
             return 368;
-        } else if (resolution.equals(RESOLUTION_480P)) {
+        } else if (RESOLUTION_480P.equals(resolution)) {
             return 480;
-        } else if (resolution.equals(RESOLUTION_540P)) {
+        } else if (RESOLUTION_540P.equals(resolution)) {
             return 544;
-        } else if (resolution.equals(RESOLUTION_720P)) {
+        } else if (RESOLUTION_720P.equals(resolution)) {
             return 720;
-        } else if (resolution.equals(RESOLUTION_1080P)) {
+        } else if (RESOLUTION_1080P.equals(resolution)) {
             return 1088;
         } else {
             return resolution.equals(RESOLUTION_SELFDEFINE) ? resolution.mSelfDefineWidth : 192;

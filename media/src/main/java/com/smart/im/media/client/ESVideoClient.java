@@ -1,11 +1,12 @@
-package com.smart.im.media.video;
+package com.smart.im.media.client;
 
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 
 import com.blankj.utilcode.util.LogUtils;
-import com.smart.im.media.bean.ESConfig;
 import com.smart.im.media.bean.PushConfig;
+import com.smart.im.media.core.ESHardVideoCore;
+import com.smart.im.media.core.ESVideoCore;
 import com.smart.im.media.enums.EncodeEnum;
 import com.smart.im.media.enums.ResolutionEnum;
 import com.smart.im.media.utils.CameraUtil;
@@ -70,7 +71,7 @@ public class ESVideoClient {
                     LogUtils.e("ESVideoClient start() failed");
                     return false;
                 }
-//                 esVideoCore.updateCamTexture(camTexture);
+                 esVideoCore.updateCamTexture(camTexture);
             }
             esVideoCore.startPreview(surfaceTexture, visualWidth, visualHeight);
             isPreviewing = true;

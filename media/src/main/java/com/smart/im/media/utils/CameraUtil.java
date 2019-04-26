@@ -154,7 +154,7 @@ public class CameraUtil {
 //        rotation = setCameraDisplayRotation(cameraId);
 
         Camera.Parameters parameters = camera.getParameters();
-        chooseCameraSize(parameters, preWidth, preHeight, 1);
+//        chooseCameraSize(parameters, preWidth, preHeight, 1);
         List<String> focusModes = parameters.getSupportedFocusModes();
         //这边采用自动对焦的模式
         if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {

@@ -36,7 +36,7 @@ public class LiveBridge {
         initVideoConfig(config.getWidth(),
                 config.getHeight(),
                 config.getBitRate(),
-                config.getFrameRate());
+                config.getFps().getValue());
 
         initAudioConfig(config.getNumChannels(),
                 config.getSampleRate(),

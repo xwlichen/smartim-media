@@ -44,7 +44,7 @@ public class GLHelper {
             "attribute vec2 aTextureCoord;\n" +      //属性-2维浮点型矢量 aTextureCoord（纹理坐标）
             "varying vec2 vTextureCoord;\n" +        //顶点着色器和片元着色器间的通信接口变量，顶点着色器和片元着色器公有，用于着色器间交互(如传递纹理坐标)
             "void main(){\n" +
-            "    gl_Position= aPosition;\n" +
+            "    gl_Position= aPosition;\n" +        //是着色器中的特殊全局变量，接受输入
             "    vTextureCoord = aTextureCoord;\n" + //纹理坐标的赋值，与片元着色器共享
             "}";
 
@@ -80,7 +80,7 @@ public class GLHelper {
             "uniform samplerExternalOES uTexture;\n" +
             "void main(){\n" +
             "    vec4  color = texture2D(uTexture, vTextureCoord);\n" +
-            "    gl_FragColor = color;\n" +
+            "    gl_FragColor = color;\n" +                             //opengl最终渲染出来的颜色的全局变量
             "}";
 
 
@@ -94,6 +94,7 @@ public class GLHelper {
             "}";
 
 
+    //绘制索引
     private static short drawIndices[] = {0, 1, 2, 0, 2, 3};
     private static float SquareVertices[] = {
             -1.0f, 1.0f,
@@ -341,6 +342,7 @@ public class GLHelper {
 
 
     public static void disableVertex(int posLoc, int texLoc) {
+        //禁用index指定顶点属性数组
         GLES20.glDisableVertexAttribArray(posLoc);
         GLES20.glDisableVertexAttribArray(texLoc);
     }
@@ -383,7 +385,7 @@ public class GLHelper {
     }
 
     public static FloatBuffer getCamera2DTextureVerticesBuffer(final DirectionEnum direction, final float cropRatio) {
-        if (direction == -1) {
+        if (direction.getDuration() == -1) {
             FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * Cam2dTextureVertices.length).
                     order(ByteOrder.nativeOrder()).
                     asFloatBuffer();
@@ -432,13 +434,13 @@ public class GLHelper {
         }
 
 
-        if ((direction & RESCoreParameters.FLAG_DIRECTION_FLIP_HORIZONTAL) != 0) {
+        if (direction==DirectionEnum.FLIP_HORIZONTAL){
             buffer[0] = flip(buffer[0]);
             buffer[2] = flip(buffer[2]);
             buffer[4] = flip(buffer[4]);
             buffer[6] = flip(buffer[6]);
         }
-        if ((direction & RESCoreParameters.FLAG_DIRECTION_FLIP_VERTICAL) != 0) {
+        if (direction ==DirectionEnum.FILP_VERTICAL) {
             buffer[1] = flip(buffer[1]);
             buffer[3] = flip(buffer[3]);
             buffer[5] = flip(buffer[5]);
@@ -475,7 +477,8 @@ public class GLHelper {
         if (mTextureBuffer == null) {
             //allocateDirect直接从系统级内存获取数据更高效   allocate是先从系统级内存copy到jvm内存中共java使用
             mTextureBuffer = ByteBuffer.allocateDirect(textureCords.length * 4)
-                    .order(ByteOrder.nativeOrder())  //返回本地jvm运行的硬件的字节顺序.使用和硬件一致的字节顺序可能使buffer更加有效.
+                    .order(ByteOrder.nativeOrder())  //返回本地jvm运行的硬件的字节顺序.使用和硬件一致的字节顺序可能使buffer更加有效，
+                    // 本地字节序是指，当一个值占用多个字节时，比如 32 位整型数，字节按照从最重要位到最不重要位或者相反顺序排列。
                     .asFloatBuffer();  //转成FloatBuffer
         }
         mTextureBuffer.clear();

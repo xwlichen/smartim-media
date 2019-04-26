@@ -29,7 +29,7 @@ public class GLShaderUtils {
         if (vertexShader == 0) {
             return 0;
         }
-        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, vertexShaderCode);
+        int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
         if (fragmentShader == 0) {
             return 0;
         }

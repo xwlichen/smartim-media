@@ -1,4 +1,4 @@
-package com.smart.im.media.video;
+package com.smart.im.media.core;
 
 import android.graphics.SurfaceTexture;
 
@@ -29,5 +29,6 @@ public interface ESVideoCore {
     void startPreview(SurfaceTexture surfaceTexture, int visualWidth, int visualHeight);
 
 
+    void updateCamTexture(SurfaceTexture camTex);
 
 }

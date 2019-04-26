@@ -62,6 +62,22 @@ public class PushConfig {
         this.numChannels = numChannels;
     }
 
+
+    public static PushConfig obtain(){
+        PushConfig config=new PushConfig();
+        config.setWidth(640);
+        config.setHeight(480);
+        config.setPreviewWidth(640);
+        config.setPreviewHeight(380);
+        config.setResolution(ResolutionEnum.RESOLUTION_480P);
+        config.setBitRate(1500);
+        config.setFps(FpsEnum.FPS_25);
+        config.setSampleRate(44100);
+        config.setAudioBitRate(64000);
+
+        return config;
+    }
+
     public String getUrl() {
         return url;
     }

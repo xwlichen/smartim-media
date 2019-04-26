@@ -1,8 +1,11 @@
-package com.smart.im.media.video;
+package com.smart.im.media.core;
 
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
+import android.opengl.EGL14;
+import android.opengl.EGLExt;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.os.Handler;
@@ -10,19 +13,22 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.Log;
 
 import com.blankj.utilcode.util.LogUtils;
-import com.smart.im.media.bean.ESConfig;
 import com.smart.im.media.bean.MediaCodecGLWapper;
 import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bean.OffScreenGLWapper;
+import com.smart.im.media.bean.RESFrameRateMeter;
 import com.smart.im.media.bean.ScreenGLWapper;
 import com.smart.im.media.bean.Size;
+import com.smart.im.media.encoder.MediaVideoEncoder;
 import com.smart.im.media.utils.GLHelper;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @date : 2019/4/9 下午3:40
@@ -45,6 +51,13 @@ public class ESHardVideoCore implements ESVideoCore {
     private VideoGLHandler videoGLHander;
 
 
+    private Lock lockVideoFilter = null;
+    //encoder mp4 start
+    private MediaVideoEncoder mVideoEncoder;
+    private boolean mNeedResetEglContext = true;
+    private int mCameraId = -1;
+
+
     private boolean isPreviewing = false;
     private boolean isStreaming = false;
     private boolean hasNewFrame = false;
@@ -57,6 +70,7 @@ public class ESHardVideoCore implements ESVideoCore {
 
     public ESHardVideoCore(PushConfig pushConfig) {
         this.pushConfig = pushConfig;
+        lockVideoFilter = new ReentrantLock(false);
     }
 
     @Override
@@ -65,7 +79,7 @@ public class ESHardVideoCore implements ESVideoCore {
             LogUtils.e("ESHardVideoCore's pushConfig is null");
             return false;
         }
-        loopingInterval = 1000 / pushConfig.getFps().getFps();
+        loopingInterval = 1000 / pushConfig.getFps().getValue();
 
         dstVideoFormat = new MediaFormat();
         videoGLHandlerThread = new HandlerThread("GLThread");
@@ -93,10 +107,11 @@ public class ESHardVideoCore implements ESVideoCore {
 
     public void onFrameAvailable() {
         if (videoGLHandlerThread != null) {
-//            videoGLHander.addFrameNum();
+            videoGLHander.addFrameNum();
         }
     }
 
+    @Override
     public void updateCamTexture(SurfaceTexture camTex) {
         synchronized (syncObj) {
             if (videoGLHander != null) {
@@ -150,12 +165,17 @@ public class ESHardVideoCore implements ESVideoCore {
         float[] textureMatrix; //纹理单元
 
 
+        public static final int FILTER_LOCK_TOLERATION = 3;//3ms
+
+        private RESFrameRateMeter drawFrameRateMeter;
+
+
 
         public VideoGLHandler(Looper looper) {
             super(looper);
             screenGLWapper = null;
             mediaCodecGLWapper = null;
-//            drawFrameRateMeter = new RESFrameRateMeter();
+            drawFrameRateMeter = new RESFrameRateMeter();
             screenSize = new Size(1, 1);
             initBuffer();
         }
@@ -213,12 +233,13 @@ public class ESHardVideoCore implements ESVideoCore {
                         }
                     }
 
+                    LogUtils.e("hasNewFrame:",hasNewFrame);
                     if (hasNewFrame) {
-//                        drawFrameBuffer();
-//                        drawMediaCodec(time * 1000000);
-//                        drawScreen();
-//                        encoderMp4(frameBufferTexture);//编码MP4
-//                        drawFrameRateMeter.count();
+                        drawFrameBuffer();
+                        drawMediaCodec(time * 1000000);
+                        drawScreen();
+                        encoderMp4(frameBufferTexture);//编码MP4
+                        drawFrameRateMeter.count();
                         hasNewFrame = false;
                     }
                     break;
@@ -258,10 +279,10 @@ public class ESHardVideoCore implements ESVideoCore {
 
                 //opengl 帧缓冲的创建
                 int[] fb = new int[1], fbt = new int[1];
-                GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//pushConfig.videoWidth, pushConfig.videoHeight
+                GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
                 sample2DFrameBuffer = fb[0];
                 sample2DFrameBufferTexture = fbt[0];
-                GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//pushConfig.videoWidth, pushConfig.videoHeight
+                GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
                 frameBuffer = fb[0];
                 frameBufferTexture = fbt[0];
             }
@@ -315,6 +336,14 @@ public class ESHardVideoCore implements ESVideoCore {
             }
         }
 
+
+        public void addFrameNum() {
+            synchronized (syncFrameNum) {
+                ++frameNum;
+                this.removeMessages(WHAT_FRAME);
+                this.sendMessageAtFrontOfQueue(this.obtainMessage(VideoGLHandler.WHAT_FRAME));
+            }
+        }
 
         /**
          * 绘制2d 帧缓冲数据
@@ -372,6 +401,12 @@ public class ESHardVideoCore implements ESVideoCore {
         private void doGLDraw() {
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+            /**从数组数据中渲染图元
+             * mode 指定要渲染的图元类型
+             * count 指定要渲染的元素数
+             * type 指定indices中值的类型
+             * indeices 指定指向存储索引的位置的指针
+             */
             GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawIndecesBuffer.limit(), GLES20.GL_UNSIGNED_SHORT, drawIndecesBuffer);
         }
 
@@ -380,10 +415,173 @@ public class ESHardVideoCore implements ESVideoCore {
             shapeVerticesBuffer = GLHelper.getShapeVerticesBuffer();
             mediaCodecTextureVerticesBuffer = GLHelper.getMediaCodecTextureVerticesBuffer();
             screenTextureVerticesBuffer = GLHelper.getScreenTextureVerticesBuffer();
-//            updateCameraIndex(currCamera);
+            updateCameraIndex(currCamera);
             drawIndecesBuffer = GLHelper.getDrawIndecesBuffer();
             cameraTextureVerticesBuffer = GLHelper.getCameraTextureVerticesBuffer();
         }
+
+        public void updateCameraIndex(int cameraIndex) {
+            synchronized (syncCameraTextureVerticesBuffer) {
+//                currCamera = cameraIndex;
+//                if (currCamera == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+//                    directionFlag = resCoreParameters.frontCameraDirectionMode ^ RESConfig.DirectionMode.FLAG_DIRECTION_FLIP_HORIZONTAL;
+//                } else {
+//                    directionFlag = resCoreParameters.backCameraDirectionMode;
+//                }
+                camera2dTextureVerticesBuffer = GLHelper.getCamera2DTextureVerticesBuffer(pushConfig.getCameraType(), resCoreParameters.cropRatio);
+            }
+        }
+
+
+        private void drawOriginFrameBuffer() {
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer);
+            GLES20.glUseProgram(offScreenGLWapper.camProgram);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, sample2DFrameBufferTexture);
+            GLES20.glUniform1i(offScreenGLWapper.camTextureLoc, 0);
+            synchronized (syncCameraTextureVerticesBuffer) {
+                GLHelper.enableVertex(offScreenGLWapper.camPostionLoc, offScreenGLWapper.camTextureCoordLoc,
+                        shapeVerticesBuffer, cameraTextureVerticesBuffer);
+            }
+            GLES20.glViewport(0, 0, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());
+            doGLDraw();
+            GLES20.glFinish();
+            GLHelper.disableVertex(offScreenGLWapper.camPostionLoc, offScreenGLWapper.camTextureCoordLoc);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+            GLES20.glUseProgram(0);
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        }
+
+
+        private void drawFrameBuffer() {
+            GLHelper.makeCurrent(offScreenGLWapper);
+//            boolean isFilterLocked = lockVideoFilter();
+            long starttime = System.currentTimeMillis();
+//            if (isFilterLocked) {
+//                if (videoFilter != innerVideoFilter) {
+//                    if (innerVideoFilter != null) {
+//                        innerVideoFilter.onDestroy();
+//                    }
+//                    innerVideoFilter = videoFilter;
+//                    if (innerVideoFilter != null) {
+//                        innerVideoFilter.onInit(resCoreParameters.previewVideoHeight, resCoreParameters.previewVideoWidth);//resCoreParameters.videoWidth, resCoreParameters.videoHeight
+//                    }
+//                }
+//                if (innerVideoFilter != null) {
+//                    synchronized (syncCameraTextureVerticesBuffer) {
+//                        innerVideoFilter.onDirectionUpdate(directionFlag);
+//                        innerVideoFilter.onDraw(sample2DFrameBufferTexture, frameBuffer, shapeVerticesBuffer, cameraTextureVerticesBuffer);
+//                    }
+//                } else {
+//                    drawOriginFrameBuffer();
+//                }
+//                unlockVideoFilter();
+//            } else {
+                drawOriginFrameBuffer();
+//            }
+            LogUtils.d("滤镜耗时："+(System.currentTimeMillis()-starttime));
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer);
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+        }
+
+        private void drawMediaCodec(long currTime) {
+            if (mediaCodecGLWapper != null) {
+                GLHelper.makeCurrent(mediaCodecGLWapper);
+                GLES20.glUseProgram(mediaCodecGLWapper.drawProgram);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, frameBufferTexture);
+                GLES20.glUniform1i(mediaCodecGLWapper.drawTextureLoc, 0);
+                GLHelper.enableVertex(mediaCodecGLWapper.drawPostionLoc, mediaCodecGLWapper.drawTextureCoordLoc,
+                        shapeVerticesBuffer, mediaCodecTextureVerticesBuffer);
+                doGLDraw();
+                GLES20.glFinish();
+                GLHelper.disableVertex(mediaCodecGLWapper.drawPostionLoc, mediaCodecGLWapper.drawTextureCoordLoc);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+                GLES20.glUseProgram(0);
+                EGLExt.eglPresentationTimeANDROID(mediaCodecGLWapper.eglDisplay, mediaCodecGLWapper.eglSurface, currTime);
+                if (!EGL14.eglSwapBuffers(mediaCodecGLWapper.eglDisplay, mediaCodecGLWapper.eglSurface)) {
+                    throw new RuntimeException("eglSwapBuffers,failed!");
+                }
+            }
+        }
+
+        private void drawScreen() {
+            if (screenGLWapper != null) {
+                GLHelper.makeCurrent(screenGLWapper);
+                GLES20.glUseProgram(screenGLWapper.drawProgram);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, frameBufferTexture);
+                GLES20.glUniform1i(screenGLWapper.drawTextureLoc, 0);
+                GLHelper.enableVertex(screenGLWapper.drawPostionLoc, screenGLWapper.drawTextureCoordLoc,
+                        shapeVerticesBuffer, screenTextureVerticesBuffer);
+                GLES20.glViewport(0, 0, screenSize.getWidth(), screenSize.getHeight());
+                doGLDraw();
+                GLES20.glFinish();
+                GLHelper.disableVertex(screenGLWapper.drawPostionLoc, screenGLWapper.drawTextureCoordLoc);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+                GLES20.glUseProgram(0);
+                if (!EGL14.eglSwapBuffers(screenGLWapper.eglDisplay, screenGLWapper.eglSurface)) {
+                    throw new RuntimeException("eglSwapBuffers,failed!");
+                }
+            }
+        }
+
+
+        private boolean lockVideoFilter() {
+            try {
+                return lockVideoFilter.tryLock(FILTER_LOCK_TOLERATION, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                return false;
+            }
+        }
+
+        private void unlockVideoFilter() {
+            lockVideoFilter.unlock();
+        }
+        public int getBufferTexture(){
+            return frameBufferTexture;
+        }
+
+        private void encoderMp4(int BufferTexture) {
+            synchronized (this) {
+                if (mVideoEncoder != null) {
+                    processStMatrix(textureMatrix, mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT);
+                    if (mNeedResetEglContext) {
+                        mVideoEncoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHander.getBufferTexture());
+                        mNeedResetEglContext = false;
+                    }
+                    mVideoEncoder.setPreviewWH(pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());
+                    mVideoEncoder.frameAvailableSoon(textureMatrix, mVideoEncoder.getMvpMatrix());
+                }
+            }
+        }
+
+    }
+
+
+    public void setVideoEncoder(final MediaVideoEncoder encoder) {
+        synchronized (this) {
+            if (encoder != null) {
+                encoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHander.getBufferTexture());
+            }
+            mVideoEncoder = encoder;
+        }
+    }
+
+    private void processStMatrix(float[] matrix, boolean needMirror) {
+        if (needMirror && matrix != null && matrix.length == 16) {
+            for (int i = 0; i < 3; i++) {
+                matrix[4 * i] = -matrix[4 * i];
+            }
+
+            if (matrix[4 * 3] == 0) {
+                matrix[4 * 3] = 1.0f;
+            } else if (matrix[4 * 3] == 1.0f) {
+                matrix[4 * 3] = 0f;
+            }
+        }
+
+        return;
     }
 
 }

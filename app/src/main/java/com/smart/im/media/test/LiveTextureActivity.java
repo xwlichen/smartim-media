@@ -39,7 +39,7 @@ public class LiveTextureActivity extends Activity {
 
 
     public void initPusher() {
-        PushConfig config = new PushConfig();
+        PushConfig config =PushConfig.obtain();
 //        String url = "rtmp://livepush.changguwen.com/changdao/xwRoom?auth_key=1552960379-cbbf3a97f8ea48b694dad7c139d07732-0-8296a36418ff764c576463f577c7e70d";
 //        String url="rtmp://169.254.143.255:1935/rtmplive/room";
         String url = "rtmp://livepush.changguwen.com/changdao/fancyRoom?auth_key=1554106513-c1f6b59621d845ada67f68929f2e98cd-0-92e59e323431c8cc4cd327ad71746b83";

@@ -2,21 +2,13 @@ package com.smart.im.media.push;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.TextureView;
-import android.view.View;
 
 import com.blankj.utilcode.util.LogUtils;
 import com.smart.im.media.bean.ESConfig;
 import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
-import com.smart.im.media.utils.CameraUtil;
-import com.smart.im.media.video.ESVideoClient;
-import com.smart.im.media.video.ESVideoCore;
-
-import java.util.concurrent.LinkedBlockingQueue;
+import com.smart.im.media.client.ESVideoClient;
 
 /**
  * @date : 2019/3/12 下午3:52
