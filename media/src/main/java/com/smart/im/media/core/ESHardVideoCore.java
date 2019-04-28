@@ -240,7 +240,7 @@ public class ESHardVideoCore implements ESVideoCore {
                     if (hasNewFrame) {
                         drawFrameBuffer();
 //                        drawMediaCodec(time * 1000000);
-                        drawScreen();
+//                        drawScreen();
 //                        encoderMp4(frameBufferTexture);//编码MP4
                         drawFrameRateMeter.count();
                         hasNewFrame = false;
