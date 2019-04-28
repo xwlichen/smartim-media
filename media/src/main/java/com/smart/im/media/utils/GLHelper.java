@@ -51,13 +51,13 @@ public class GLHelper {
 
     private static final String VERTEX_SHADER_CAMERA2D =
             "attribute vec4 aPosition;\n" +
-                    "attribute vec4 aTextureCoord;\n" +
-                    "uniform mat4 uTextureMatrix;\n" +  //4*4浮点类型矩阵常量
-                    "varying vec2 vTextureCoord;\n" +
-                    "void main(){\n" +
-                    "    gl_Position= aPosition;\n" +
-                    "    vTextureCoord = (uTextureMatrix * aTextureCoord).xy;\n" +
-                    "}";
+            "attribute vec4 aTextureCoord;\n" +
+            "uniform mat4 uTextureMatrix;\n" +  //4*4浮点类型矩阵常量
+            "varying vec2 vTextureCoord;\n" +
+            "void main(){\n" +
+            "    gl_Position= aPosition;\n" +
+            "    vTextureCoord = (uTextureMatrix * aTextureCoord).xy;\n" +
+            "}";
 
 
     /**

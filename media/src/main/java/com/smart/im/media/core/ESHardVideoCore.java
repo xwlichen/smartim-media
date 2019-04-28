@@ -30,6 +30,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.smart.im.media.enums.DirectionEnum.ROTATION_0;
+import static com.smart.im.media.enums.DirectionEnum.ROTATION_90;
+
 /**
  * @date : 2019/4/9 下午3:40
  * @author: lichen
@@ -236,9 +239,9 @@ public class ESHardVideoCore implements ESVideoCore {
                     LogUtils.e("hasNewFrame:",hasNewFrame);
                     if (hasNewFrame) {
                         drawFrameBuffer();
-                        drawMediaCodec(time * 1000000);
+//                        drawMediaCodec(time * 1000000);
                         drawScreen();
-                        encoderMp4(frameBufferTexture);//编码MP4
+//                        encoderMp4(frameBufferTexture);//编码MP4
                         drawFrameRateMeter.count();
                         hasNewFrame = false;
                     }
@@ -367,12 +370,13 @@ public class ESHardVideoCore implements ESVideoCore {
             //将离屏程序的片元着色器uniform的变量设置为0
             GLES20.glUniform1i(offScreenGLWapper.cam2dTextureLoc, 0);
             synchronized (syncCameraTextureVerticesBuffer) {
+                //顶点坐标、纹理坐标，赋值     shapeVerticesBuffer顶点坐标的绘制限制，camera2dTextureVerticesBuffer纹理坐标的绘制限制
                 GLHelper.enableVertex(offScreenGLWapper.cam2dPostionLoc, offScreenGLWapper.cam2dTextureCoordLoc,
                         shapeVerticesBuffer, camera2dTextureVerticesBuffer);
             }
             //OpenGl最多支持16个纹理单元
             textureMatrix = new float[16];
-            //得到SurfaceTexture的变换矩阵
+            //得到SurfaceTexture的变换矩阵(缩放、平移等)
             cameraTexture.getTransformMatrix(textureMatrix);
             //encoder mp4 start
             //processStMatrix(textureMatrix, mCameraID == Camera.CameraInfo.CAMERA_FACING_FRONT);
@@ -386,8 +390,9 @@ public class ESHardVideoCore implements ESVideoCore {
 
             GLES20.glUniformMatrix4fv(offScreenGLWapper.cam2dTextureMatrix, 1, false, textureMatrix, 0);
             //设置视口大小
-            GLES20.glViewport(0, 0, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//resCoreParameters.videoWidth, resCoreParameters.videoHeight
+            GLES20.glViewport(0, 0, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//resCoreParameters.videoWidth, resCoreParameters.videoHeight
             doGLDraw();
+            //通知OpenGL渲染管线阻塞执行前面所有的指令
             GLES20.glFinish();
             GLHelper.disableVertex(offScreenGLWapper.cam2dPostionLoc, offScreenGLWapper.cam2dTextureCoordLoc);
             //解绑纹理
@@ -415,7 +420,7 @@ public class ESHardVideoCore implements ESVideoCore {
             shapeVerticesBuffer = GLHelper.getShapeVerticesBuffer();
             mediaCodecTextureVerticesBuffer = GLHelper.getMediaCodecTextureVerticesBuffer();
             screenTextureVerticesBuffer = GLHelper.getScreenTextureVerticesBuffer();
-            updateCameraIndex(currCamera);
+            updateCameraIndex(1);
             drawIndecesBuffer = GLHelper.getDrawIndecesBuffer();
             cameraTextureVerticesBuffer = GLHelper.getCameraTextureVerticesBuffer();
         }
@@ -428,29 +433,12 @@ public class ESHardVideoCore implements ESVideoCore {
 //                } else {
 //                    directionFlag = resCoreParameters.backCameraDirectionMode;
 //                }
-                camera2dTextureVerticesBuffer = GLHelper.getCamera2DTextureVerticesBuffer(pushConfig.getCameraType(), resCoreParameters.cropRatio);
+                camera2dTextureVerticesBuffer = GLHelper.getCamera2DTextureVerticesBuffer(ROTATION_90, 0.0f);
             }
         }
 
 
-        private void drawOriginFrameBuffer() {
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer);
-            GLES20.glUseProgram(offScreenGLWapper.camProgram);
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, sample2DFrameBufferTexture);
-            GLES20.glUniform1i(offScreenGLWapper.camTextureLoc, 0);
-            synchronized (syncCameraTextureVerticesBuffer) {
-                GLHelper.enableVertex(offScreenGLWapper.camPostionLoc, offScreenGLWapper.camTextureCoordLoc,
-                        shapeVerticesBuffer, cameraTextureVerticesBuffer);
-            }
-            GLES20.glViewport(0, 0, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());
-            doGLDraw();
-            GLES20.glFinish();
-            GLHelper.disableVertex(offScreenGLWapper.camPostionLoc, offScreenGLWapper.camTextureCoordLoc);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
-            GLES20.glUseProgram(0);
-            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
-        }
+
 
 
         private void drawFrameBuffer() {
@@ -503,6 +491,25 @@ public class ESHardVideoCore implements ESVideoCore {
                     throw new RuntimeException("eglSwapBuffers,failed!");
                 }
             }
+        }
+
+        private void drawOriginFrameBuffer() {
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer);
+            GLES20.glUseProgram(offScreenGLWapper.camProgram);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, sample2DFrameBufferTexture);
+            GLES20.glUniform1i(offScreenGLWapper.camTextureLoc, 0);
+            synchronized (syncCameraTextureVerticesBuffer) {
+                GLHelper.enableVertex(offScreenGLWapper.camPostionLoc, offScreenGLWapper.camTextureCoordLoc,
+                        shapeVerticesBuffer, cameraTextureVerticesBuffer);
+            }
+            GLES20.glViewport(0, 0, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());
+            doGLDraw();
+            GLES20.glFinish();
+            GLHelper.disableVertex(offScreenGLWapper.camPostionLoc, offScreenGLWapper.camTextureCoordLoc);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+            GLES20.glUseProgram(0);
+            GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         }
 
         private void drawScreen() {

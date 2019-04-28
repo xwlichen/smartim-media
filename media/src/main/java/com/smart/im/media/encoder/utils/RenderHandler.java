@@ -51,6 +51,7 @@ public final class RenderHandler implements Runnable {
 			mSurface = surface;
 			mIsRecordable = isRecordable;
 			mRequestSetEglContext = true;
+			// 设置初始的单位矩阵
 			Matrix.setIdentityM(mMatrix, 0);
 			Matrix.setIdentityM(mMatrix, 16);
 			mSync.notifyAll();
