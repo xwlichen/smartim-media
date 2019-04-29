@@ -13,6 +13,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.blankj.utilcode.util.LogUtils;
 import com.smart.im.media.bean.MediaCodecGLWapper;
@@ -161,8 +162,8 @@ public class ESHardVideoCore implements ESVideoCore {
         private FloatBuffer mediaCodecTextureVerticesBuffer;
         private FloatBuffer screenTextureVerticesBuffer;
         private FloatBuffer camera2dTextureVerticesBuffer;
-        private FloatBuffer shapeVerticesBuffer;
         private FloatBuffer cameraTextureVerticesBuffer;
+        private FloatBuffer shapeVerticesBuffer;
         private ShortBuffer drawIndecesBuffer;
 
         float[] textureMatrix; //纹理单元
@@ -240,7 +241,7 @@ public class ESHardVideoCore implements ESVideoCore {
                     if (hasNewFrame) {
                         drawFrameBuffer();
 //                        drawMediaCodec(time * 1000000);
-//                        drawScreen();
+                        drawScreen();
 //                        encoderMp4(frameBufferTexture);//编码MP4
                         drawFrameRateMeter.count();
                         hasNewFrame = false;
@@ -283,6 +284,8 @@ public class ESHardVideoCore implements ESVideoCore {
                 //opengl 帧缓冲的创建
                 int[] fb = new int[1], fbt = new int[1];
                 GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
+//                GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//pushConfig.videoWidth, pushConfig.videoHeight
+
                 sample2DFrameBuffer = fb[0];
                 sample2DFrameBufferTexture = fbt[0];
                 GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
@@ -452,7 +455,7 @@ public class ESHardVideoCore implements ESVideoCore {
 //                    }
 //                    innerVideoFilter = videoFilter;
 //                    if (innerVideoFilter != null) {
-//                        innerVideoFilter.onInit(resCoreParameters.previewVideoHeight, resCoreParameters.previewVideoWidth);//resCoreParameters.videoWidth, resCoreParameters.videoHeight
+//                        innerVideoFilter.onInit(resCoreParameters.pre·viewVideoHeight, resCoreParameters.previewVideoWidth);//resCoreParameters.videoWidth, resCoreParameters.videoHeight
 //                    }
 //                }
 //                if (innerVideoFilter != null) {
@@ -504,6 +507,8 @@ public class ESHardVideoCore implements ESVideoCore {
                         shapeVerticesBuffer, cameraTextureVerticesBuffer);
             }
             GLES20.glViewport(0, 0, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());
+//            GLES20.glViewport(0, 0, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());
+
             doGLDraw();
             GLES20.glFinish();
             GLHelper.disableVertex(offScreenGLWapper.camPostionLoc, offScreenGLWapper.camTextureCoordLoc);
