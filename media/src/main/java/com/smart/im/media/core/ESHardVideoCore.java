@@ -369,6 +369,7 @@ public class ESHardVideoCore implements ESVideoCore {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             //绑定纹理，设置类型 纹理帮定的目标(target)并不是通常的GL_TEXTURE_2D，而是GL_TEXTURE_EXTERNAL_OES,
             // 这是因为Camera使用的输出texture是一种特殊的格式。同样的，在shader中我们也必须使用SamperExternalOES 的变量类型来访问该纹理。
+            //GL_TEXTURE_EXTERNAL_OES 实际上就是两个OpenGL Thread共享一个Texture，不再需要数据导入导出，从Camera采集的数据直接在GPU中完成转换和渲染
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, OVERWATCH_TEXTURE_ID);
             //将离屏程序的片元着色器uniform的变量设置为0
             GLES20.glUniform1i(offScreenGLWapper.cam2dTextureLoc, 0);
