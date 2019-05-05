@@ -508,7 +508,7 @@ public class ESHardVideoCore implements ESVideoCore {
                         shapeVerticesBuffer, cameraTextureVerticesBuffer);
             }
             GLES20.glViewport(0, 0, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());
-//            GLES20.glViewport(0, 0, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());
+//            GLES20.glViewport(0, 0, 200, pushConfig.getPreviewHeight());
 
             doGLDraw();
             GLES20.glFinish();
