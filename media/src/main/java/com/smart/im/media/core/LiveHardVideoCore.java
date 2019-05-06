@@ -220,6 +220,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
                             }
                         }
                     }
+                    //原始纹理数据
                     drawSample2DFrameBuffer(cameraTexture);
                     break;
                 case WHAT_DRAW:
@@ -246,6 +247,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
                         //共享texture
                         drawFrameBuffer();
 //                        drawMediaCodec(time * 1000000);
+                        //共享drawFrameBuffer的滤镜后的数据
                         drawScreen();
 //                        encoderMp4(frameBufferTexture);//编码MP4
                         drawFrameRateMeter.count();
@@ -450,7 +452,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
 
         private void drawFrameBuffer() {
             GLHelper.makeCurrent(offScreenGLWapper);
-//            boolean isFilterLocked = lockVideoFilter();
+            boolean isFilterLocked = lockVideoFilter();
             long starttime = System.currentTimeMillis();
 //            if (isFilterLocked) {
 //                if (videoFilter != innerVideoFilter) {
