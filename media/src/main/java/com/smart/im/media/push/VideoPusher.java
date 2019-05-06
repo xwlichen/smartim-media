@@ -5,10 +5,9 @@ import android.graphics.SurfaceTexture;
 import android.view.TextureView;
 
 import com.blankj.utilcode.util.LogUtils;
-import com.smart.im.media.bean.ESConfig;
 import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
-import com.smart.im.media.client.ESVideoClient;
+import com.smart.im.media.client.LiveVideoClient;
 
 /**
  * @date : 2019/3/12 下午3:52
@@ -18,16 +17,11 @@ import com.smart.im.media.client.ESVideoClient;
  */
 public class VideoPusher implements ILivePusher {
 
-    private static final String TAG = VideoPusher.class.getSimpleName();
-
-    public int OVERWATCH_TEXTURE_ID = 10;
-
-    private SurfaceTexture cameraTexture;
     private boolean isPushing = false;
 
     private LiveBridge liveBridge;
 
-    private ESVideoClient esVideoClient;
+    private LiveVideoClient liveVideoClient;
 
 
     public VideoPusher(LiveBridge liveBridge) {
@@ -39,10 +33,9 @@ public class VideoPusher implements ILivePusher {
 
     @Override
     public void init(Context context, PushConfig pushConfig) {
-        ESConfig esConfig = new ESConfig();
-        esVideoClient = new ESVideoClient(pushConfig);
-        if (!esVideoClient.prepare()) {
-            LogUtils.e("!!!!! ESVideoClient prepare() failed !!!!");
+        liveVideoClient = new LiveVideoClient(pushConfig);
+        if (!liveVideoClient.prepare()) {
+            LogUtils.e("!!!!! LiveVideoClient prepare() failed !!!!");
             return;
         }
 
@@ -103,7 +96,7 @@ public class VideoPusher implements ILivePusher {
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                esVideoClient.startPreview(surface, width, height);
+                liveVideoClient.startPreview(surface, width, height);
             }
 
             @Override

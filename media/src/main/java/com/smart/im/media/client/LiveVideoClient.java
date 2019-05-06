@@ -5,8 +5,8 @@ import android.hardware.Camera;
 
 import com.blankj.utilcode.util.LogUtils;
 import com.smart.im.media.bean.PushConfig;
-import com.smart.im.media.core.ESHardVideoCore;
-import com.smart.im.media.core.ESVideoCore;
+import com.smart.im.media.core.LiveHardVideoCore;
+import com.smart.im.media.core.LiveVideoCore;
 import com.smart.im.media.enums.EncodeEnum;
 import com.smart.im.media.enums.ResolutionEnum;
 import com.smart.im.media.utils.CameraUtil;
@@ -19,12 +19,12 @@ import java.io.IOException;
  * @email : 1960003945@qq.com
  * @description :
  */
-public class ESVideoClient {
+public class LiveVideoClient {
     private final Object syncObj = new Object();
 
 
     private PushConfig pushConfig;
-    private ESVideoCore esVideoCore;
+    private LiveVideoCore liveVideoCore;
 
     private Camera camera;
     private SurfaceTexture camTexture;
@@ -33,7 +33,7 @@ public class ESVideoClient {
     private boolean isPreviewing;
 
 
-    public ESVideoClient(PushConfig pushConfig) {
+    public LiveVideoClient(PushConfig pushConfig) {
         this.pushConfig = pushConfig;
     }
 
@@ -53,10 +53,10 @@ public class ESVideoClient {
         pushConfig.setPreviewWidth(size.width);
         pushConfig.setPreviewHeight(size.height);
         if (pushConfig.getEndcoderType() == EncodeEnum.HARD) {
-            esVideoCore = new ESHardVideoCore(pushConfig);
+            liveVideoCore = new LiveHardVideoCore(pushConfig);
         }
 
-        if (!esVideoCore.prepare()) {
+        if (!liveVideoCore.prepare()) {
             return false;
         }
 
@@ -68,28 +68,28 @@ public class ESVideoClient {
         synchronized (syncObj) {
             if (!isStreaming && !isPreviewing) {
                 if (!setCameraListener()) {
-                    LogUtils.e("ESVideoClient start() failed");
+                    LogUtils.e("LiveVideoClient start() failed");
                     return false;
                 }
-                 esVideoCore.updateCamTexture(camTexture);
+                 liveVideoCore.updateCamTexture(camTexture);
             }
-            esVideoCore.startPreview(surfaceTexture, visualWidth, visualHeight);
+            liveVideoCore.startPreview(surfaceTexture, visualWidth, visualHeight);
             isPreviewing = true;
-            LogUtils.e("ESVideoClient start() success");
+            LogUtils.e("LiveVideoClient start() success");
             return true;
         }
     }
 
 
     public boolean setCameraListener() {
-        camTexture = new SurfaceTexture(ESVideoCore.OVERWATCH_TEXTURE_ID);
+        camTexture = new SurfaceTexture(LiveVideoCore.OVERWATCH_TEXTURE_ID);
         if (pushConfig.getEndcoderType() == EncodeEnum.SOFT) {
             camera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
                 @Override
                 public void onPreviewFrame(byte[] data, Camera camera) {
                     synchronized (syncObj) {
-                        if (esVideoCore != null && data != null) {
-//                            ((ES) esVideoCore).queueVideo(data);
+                        if (liveVideoCore != null && data != null) {
+//                            ((ES) liveVideoCore).queueVideo(data);
                         }
                         camera.addCallbackBuffer(data);
                     }
@@ -100,8 +100,8 @@ public class ESVideoClient {
                 @Override
                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                     synchronized (syncObj) {
-                        if (esVideoCore != null) {
-                            ((ESHardVideoCore) esVideoCore).onFrameAvailable();
+                        if (liveVideoCore != null) {
+                            ((LiveHardVideoCore) liveVideoCore).onFrameAvailable();
                         }
                     }
                 }

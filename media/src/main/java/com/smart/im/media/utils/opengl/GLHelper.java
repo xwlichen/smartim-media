@@ -1,5 +1,6 @@
-package com.smart.im.media.utils;
+package com.smart.im.media.utils.opengl;
 
+import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
 import android.opengl.EGLConfig;
@@ -8,10 +9,13 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 import com.blankj.utilcode.util.LogUtils;
+import com.smart.im.media.Constants;
+import com.smart.im.media.OpenGLConstants;
 import com.smart.im.media.bean.MediaCodecGLWapper;
 import com.smart.im.media.bean.OffScreenGLWapper;
 import com.smart.im.media.bean.ScreenGLWapper;
 import com.smart.im.media.enums.DirectionEnum;
+import com.smart.im.media.utils.GLShaderUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -20,8 +24,17 @@ import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.egl.EGL10;
 
+import static com.smart.im.media.OpenGLConstants.COORDS_PER_VERTEX;
+import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices;
+import static com.smart.im.media.OpenGLConstants.FRAGMENT_SHADER_2D;
+import static com.smart.im.media.OpenGLConstants.FRAGMENT_SHADER_CAMERA;
+import static com.smart.im.media.OpenGLConstants.FRAGMENT_SHADER_CAMERA2D;
+import static com.smart.im.media.OpenGLConstants.TEXTURE_COORDS_PER_VERTEX;
+import static com.smart.im.media.OpenGLConstants.VERTEX_SHADER;
+import static com.smart.im.media.OpenGLConstants.VERTEX_SHADER_CAMERA2D;
 import static com.smart.im.media.enums.DirectionEnum.ROTATION_0;
 import static com.smart.im.media.enums.DirectionEnum.ROTATION_180;
+import static com.smart.im.media.utils.opengl.VertexArray.flip2;
 
 /**
  * @date : 2019/4/9 下午3:16
@@ -30,121 +43,6 @@ import static com.smart.im.media.enums.DirectionEnum.ROTATION_180;
  * @description :
  */
 public class GLHelper {
-    public static int FLOAT_SIZE_BYTES = 4;
-    public static int SHORT_SIZE_BYTES = 2;
-    public static int COORDS_PER_VERTEX = 2;
-    public static int TEXTURE_COORDS_PER_VERTEX = 2;
-
-
-    /**
-     * 顶点着色器脚本代码
-     */
-    private static String VERTEX_SHADER = "" +
-            "attribute vec4 aPosition;\n" +          //属性-4维浮点型矢量 aPosition（位置坐标）
-            "attribute vec2 aTextureCoord;\n" +      //属性-2维浮点型矢量 aTextureCoord（纹理坐标）
-            "varying vec2 vTextureCoord;\n" +        //顶点着色器和片元着色器间的通信接口变量，顶点着色器和片元着色器公有，用于着色器间交互(如传递纹理坐标)
-            "void main(){\n" +
-            "    gl_Position= aPosition;\n" +        //是着色器中的特殊全局变量，接受输入
-            "    vTextureCoord = aTextureCoord;\n" + //纹理坐标的赋值，与片元着色器共享
-            "}";
-
-
-    private static final String VERTEX_SHADER_CAMERA2D =
-            "attribute vec4 aPosition;\n" +
-            "attribute vec4 aTextureCoord;\n" +
-            "uniform mat4 uTextureMatrix;\n" +  //4*4浮点类型矩阵常量
-            "varying vec2 vTextureCoord;\n" +
-            "void main(){\n" +
-            "    gl_Position= aPosition;\n" +
-            "    vTextureCoord = (uTextureMatrix * aTextureCoord).xy;\n" +
-            "}";
-
-
-    /**
-     * 片元着色器脚本代码-相机
-     */
-    private static String FRAGMENT_SHADER_CAMERA = "" +
-            "#extension GL_OES_EGL_image_external : require\n" +        //#extension 扩展列表， require:需要全部扩展
-            "precision highp float;\n" +                                //设置float的精度（precision）  高精度，默认是中等精度
-            "varying highp vec2 vTextureCoord;\n" +                     //与顶点着色器通信
-            "uniform sampler2D uTexture;\n" +                           //常量-2D贴图采样器，基础贴图
-            "void main(){\n" +
-            "    vec4  color = texture2D(uTexture, vTextureCoord);\n" +
-            "    gl_FragColor = color;\n" +                             //根据纹理坐标渲染到内存中
-            "}";
-
-    private static String FRAGMENT_SHADER_CAMERA2D = "" +
-            "#extension GL_OES_EGL_image_external : require\n" +
-            "precision highp float;\n" +
-            "varying highp vec2 vTextureCoord;\n" +
-            "uniform samplerExternalOES uTexture;\n" +
-            "void main(){\n" +
-            "    vec4  color = texture2D(uTexture, vTextureCoord);\n" +
-            "    gl_FragColor = color;\n" +                             //opengl最终渲染出来的颜色的全局变量
-            "}";
-
-
-    private static String FRAGMENT_SHADER_2D = "" +
-            "precision highp float;\n" +
-            "varying highp vec2 vTextureCoord;\n" +
-            "uniform sampler2D uTexture;\n" +
-            "void main(){\n" +
-            "    vec4  color = texture2D(uTexture, vTextureCoord);\n" +
-            "    gl_FragColor = color;\n" +
-            "}";
-
-
-    //绘制索引
-    private static short drawIndices[] = {0, 1, 2, 0, 2, 3};
-    private static float SquareVertices[] = {
-            -1.0f, 1.0f,
-            -1.0f, -1.0f,
-            1.0f, -1.0f,
-            1.0f, 1.0f};
-    private static float CamTextureVertices[] = {
-            0.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f};
-    /**
-     * 纹理坐标
-     * 1
-     * |
-     * |
-     * |
-     * 0----------1
-     */
-    private static float Cam2dTextureVertices[] = {
-            0.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f};
-    private static float Cam2dTextureVertices_90[] = {
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f,
-            0.0f, 1.0f};
-    private static float Cam2dTextureVertices_180[] = {
-            1.0f, 0.0f,
-            1.0f, 1.0f,
-            0.0f, 1.0f,
-            0.0f, 0.0f};
-    private static float Cam2dTextureVertices_270[] = {
-            1.0f, 1.0f,
-            0.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f};
-    public static float MediaCodecTextureVertices[] = {
-            0.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f};
-
-    private static float ScreenTextureVertices[] = {
-            0.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f};
 
 
     /**
@@ -277,17 +175,16 @@ public class GLHelper {
 
 
     public static int createCameraProgram() {
-        return GLShaderUtils.createProgram(VERTEX_SHADER, FRAGMENT_SHADER_CAMERA);
+        return ShaderHelper.buildProgram(VERTEX_SHADER, FRAGMENT_SHADER_CAMERA);
     }
 
     public static int createCamera2DProgram() {
-        return GLShaderUtils.createProgram(VERTEX_SHADER_CAMERA2D, FRAGMENT_SHADER_CAMERA2D);
+        return ShaderHelper.buildProgram(VERTEX_SHADER_CAMERA2D, FRAGMENT_SHADER_CAMERA2D);
     }
 
     public static int createScreenProgram() {
-        return GLShaderUtils.createProgram(VERTEX_SHADER, FRAGMENT_SHADER_2D);
+        return ShaderHelper.buildProgram(VERTEX_SHADER, FRAGMENT_SHADER_2D);
     }
-
 
     public static void createCamFrameBuff(int[] frameBuffer, int[] frameBufferTex, int width, int height) {
         //创建FBO
@@ -348,121 +245,6 @@ public class GLHelper {
     }
 
 
-    public static ShortBuffer getDrawIndecesBuffer() {
-        ShortBuffer result = ByteBuffer.allocateDirect(SHORT_SIZE_BYTES * drawIndices.length).
-                order(ByteOrder.nativeOrder()).
-                asShortBuffer();
-        result.put(drawIndices);
-        result.position(0);
-        return result;
-    }
-
-    public static FloatBuffer getShapeVerticesBuffer() {
-        FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * SquareVertices.length).
-                order(ByteOrder.nativeOrder()).
-                asFloatBuffer();
-        result.put(SquareVertices);
-        result.position(0);
-        return result;
-    }
-
-    public static FloatBuffer getMediaCodecTextureVerticesBuffer() {
-        FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * MediaCodecTextureVertices.length).
-                order(ByteOrder.nativeOrder()).
-                asFloatBuffer();
-        result.put(MediaCodecTextureVertices);
-        result.position(0);
-        return result;
-    }
-
-    public static FloatBuffer getScreenTextureVerticesBuffer() {
-        FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * ScreenTextureVertices.length).
-                order(ByteOrder.nativeOrder()).
-                asFloatBuffer();
-        result.put(ScreenTextureVertices);
-        result.position(0);
-        return result;
-    }
-
-    public static FloatBuffer getCamera2DTextureVerticesBuffer(final DirectionEnum direction, final float cropRatio) {
-        if (direction.getDuration() == -1) {
-            FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * Cam2dTextureVertices.length).
-                    order(ByteOrder.nativeOrder()).
-                    asFloatBuffer();
-            result.put(CamTextureVertices);
-            result.position(0);
-            return result;
-        }
-        float[] buffer;
-        switch (direction) {
-            case ROTATION_90:
-                buffer = Cam2dTextureVertices_90.clone();
-                break;
-            case ROTATION_180:
-                buffer = Cam2dTextureVertices_180.clone();
-                break;
-            case ROTATION_270:
-                buffer = Cam2dTextureVertices_270.clone();
-                break;
-            default:
-                buffer = Cam2dTextureVertices.clone();
-        }
-        if (direction == ROTATION_0 || direction == ROTATION_180) {
-            if (cropRatio > 0) {
-                buffer[1] = buffer[1] == 1.0f ? (1.0f - cropRatio) : cropRatio;
-                buffer[3] = buffer[3] == 1.0f ? (1.0f - cropRatio) : cropRatio;
-                buffer[5] = buffer[5] == 1.0f ? (1.0f - cropRatio) : cropRatio;
-                buffer[7] = buffer[7] == 1.0f ? (1.0f - cropRatio) : cropRatio;
-            } else {
-                buffer[0] = buffer[0] == 1.0f ? (1.0f + cropRatio) : -cropRatio;
-                buffer[2] = buffer[2] == 1.0f ? (1.0f + cropRatio) : -cropRatio;
-                buffer[4] = buffer[4] == 1.0f ? (1.0f + cropRatio) : -cropRatio;
-                buffer[6] = buffer[6] == 1.0f ? (1.0f + cropRatio) : -cropRatio;
-            }
-        } else {
-            if (cropRatio > 0) {
-                buffer[0] = buffer[0] == 1.0f ? (1.0f - cropRatio) : cropRatio;
-                buffer[2] = buffer[2] == 1.0f ? (1.0f - cropRatio) : cropRatio;
-                buffer[4] = buffer[4] == 1.0f ? (1.0f - cropRatio) : cropRatio;
-                buffer[6] = buffer[6] == 1.0f ? (1.0f - cropRatio) : cropRatio;
-            } else {
-                buffer[1] = buffer[1] == 1.0f ? (1.0f + cropRatio) : -cropRatio;
-                buffer[3] = buffer[3] == 1.0f ? (1.0f + cropRatio) : -cropRatio;
-                buffer[5] = buffer[5] == 1.0f ? (1.0f + cropRatio) : -cropRatio;
-                buffer[7] = buffer[7] == 1.0f ? (1.0f + cropRatio) : -cropRatio;
-            }
-        }
-
-
-        if (direction==DirectionEnum.FLIP_HORIZONTAL){
-            buffer[0] = flip(buffer[0]);
-            buffer[2] = flip(buffer[2]);
-            buffer[4] = flip(buffer[4]);
-            buffer[6] = flip(buffer[6]);
-        }
-        if (direction ==DirectionEnum.FILP_VERTICAL) {
-            buffer[1] = flip(buffer[1]);
-            buffer[3] = flip(buffer[3]);
-            buffer[5] = flip(buffer[5]);
-            buffer[7] = flip(buffer[7]);
-        }
-        FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * buffer.length).
-                order(ByteOrder.nativeOrder()).
-                asFloatBuffer();
-        result.put(buffer);
-        result.position(0);
-        return result;
-    }
-
-    public static FloatBuffer getCameraTextureVerticesBuffer() {
-        FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * Cam2dTextureVertices.length).
-                order(ByteOrder.nativeOrder()).
-                asFloatBuffer();
-        result.put(CamTextureVertices);
-        result.position(0);
-        return result;
-    }
-
 
     /**
      * 根据pushconfig的镜像相关参数设置纹理的坐标缓冲区
@@ -510,16 +292,7 @@ public class GLHelper {
         return rotatedTex;
     }
 
-    private static float flip(final float i) {
-        return (1.0f - i);
-    }
 
-    private static float flip2(final float i) {
-        if (i == 0.0f) {
-            return 1.0f;
-        }
-        return 0.0f;
-    }
 
 
     /**

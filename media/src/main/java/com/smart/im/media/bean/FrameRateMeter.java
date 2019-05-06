@@ -1,7 +1,7 @@
 package com.smart.im.media.bean;
 
 
-public class RESFrameRateMeter {
+public class FrameRateMeter {
     private static final long TIMETRAVEL = 1;
     private static final long TIMETRAVEL_MS = TIMETRAVEL * 1000;
     private static final long GET_TIMETRAVEL_MS = 2 * TIMETRAVEL_MS;
@@ -9,7 +9,7 @@ public class RESFrameRateMeter {
     private float lastFps;
     private long lastUpdateTime;
 
-    public RESFrameRateMeter() {
+    public FrameRateMeter() {
         times = 0;
         lastFps = 0;
         lastUpdateTime = 0;

@@ -13,17 +13,17 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.Log;
 
 import com.blankj.utilcode.util.LogUtils;
 import com.smart.im.media.bean.MediaCodecGLWapper;
 import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bean.OffScreenGLWapper;
-import com.smart.im.media.bean.RESFrameRateMeter;
+import com.smart.im.media.bean.FrameRateMeter;
 import com.smart.im.media.bean.ScreenGLWapper;
 import com.smart.im.media.bean.Size;
 import com.smart.im.media.encoder.MediaVideoEncoder;
-import com.smart.im.media.utils.GLHelper;
+import com.smart.im.media.utils.opengl.GLHelper;
+import com.smart.im.media.utils.opengl.VertexArray;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -31,7 +31,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static com.smart.im.media.enums.DirectionEnum.ROTATION_0;
+import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices;
+import static com.smart.im.media.OpenGLConstants.DrawIndices;
+import static com.smart.im.media.OpenGLConstants.FLOAT_SIZE_BYTES;
+import static com.smart.im.media.OpenGLConstants.MediaCodecTextureVertices;
+import static com.smart.im.media.OpenGLConstants.SHORT_SIZE_BYTES;
+import static com.smart.im.media.OpenGLConstants.ScreenTextureVertices;
+import static com.smart.im.media.OpenGLConstants.SquareVertices;
 import static com.smart.im.media.enums.DirectionEnum.ROTATION_90;
 
 /**
@@ -40,7 +46,7 @@ import static com.smart.im.media.enums.DirectionEnum.ROTATION_90;
  * @email : 1960003945@qq.com
  * @description :
  */
-public class ESHardVideoCore implements ESVideoCore {
+public class LiveHardVideoCore implements LiveVideoCore {
 
     private final Object syncObj = new Object();
     private final Object syncIsLooping = new Object();
@@ -72,7 +78,7 @@ public class ESHardVideoCore implements ESVideoCore {
     private int loopingInterval;
 
 
-    public ESHardVideoCore(PushConfig pushConfig) {
+    public LiveHardVideoCore(PushConfig pushConfig) {
         this.pushConfig = pushConfig;
         lockVideoFilter = new ReentrantLock(false);
     }
@@ -80,7 +86,7 @@ public class ESHardVideoCore implements ESVideoCore {
     @Override
     public boolean prepare() {
         if (pushConfig == null) {
-            LogUtils.e("ESHardVideoCore's pushConfig is null");
+            LogUtils.e("LiveHardVideoCore's pushConfig is null");
             return false;
         }
         loopingInterval = 1000 / pushConfig.getFps().getValue();
@@ -171,7 +177,7 @@ public class ESHardVideoCore implements ESVideoCore {
 
         public static final int FILTER_LOCK_TOLERATION = 3;//3ms
 
-        private RESFrameRateMeter drawFrameRateMeter;
+        private FrameRateMeter drawFrameRateMeter;
 
 
 
@@ -179,7 +185,7 @@ public class ESHardVideoCore implements ESVideoCore {
             super(looper);
             screenGLWapper = null;
             mediaCodecGLWapper = null;
-            drawFrameRateMeter = new RESFrameRateMeter();
+            drawFrameRateMeter = new FrameRateMeter();
             screenSize = new Size(1, 1);
             initBuffer();
         }
@@ -239,6 +245,7 @@ public class ESHardVideoCore implements ESVideoCore {
 
                     LogUtils.e("hasNewFrame:",hasNewFrame);
                     if (hasNewFrame) {
+                        //共享texture
                         drawFrameBuffer();
 //                        drawMediaCodec(time * 1000000);
                         drawScreen();
@@ -284,8 +291,6 @@ public class ESHardVideoCore implements ESVideoCore {
                 //opengl 帧缓冲的创建
                 int[] fb = new int[1], fbt = new int[1];
                 GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
-//                GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//pushConfig.videoWidth, pushConfig.videoHeight
-
                 sample2DFrameBuffer = fb[0];
                 sample2DFrameBufferTexture = fbt[0];
                 GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
@@ -421,12 +426,12 @@ public class ESHardVideoCore implements ESVideoCore {
 
 
         private void initBuffer() {
-            shapeVerticesBuffer = GLHelper.getShapeVerticesBuffer();
-            mediaCodecTextureVerticesBuffer = GLHelper.getMediaCodecTextureVerticesBuffer();
-            screenTextureVerticesBuffer = GLHelper.getScreenTextureVerticesBuffer();
+            shapeVerticesBuffer = VertexArray.initFloatBuffer(SquareVertices,FLOAT_SIZE_BYTES);
+            mediaCodecTextureVerticesBuffer = VertexArray.initFloatBuffer(MediaCodecTextureVertices,FLOAT_SIZE_BYTES);
+            screenTextureVerticesBuffer = VertexArray.initFloatBuffer(ScreenTextureVertices,FLOAT_SIZE_BYTES);
             updateCameraIndex(1);
-            drawIndecesBuffer = GLHelper.getDrawIndecesBuffer();
-            cameraTextureVerticesBuffer = GLHelper.getCameraTextureVerticesBuffer();
+            drawIndecesBuffer = VertexArray.initShortBuffer(DrawIndices,SHORT_SIZE_BYTES);
+            cameraTextureVerticesBuffer = VertexArray.initFloatBuffer(Cam2dTextureVertices,FLOAT_SIZE_BYTES);
         }
 
         public void updateCameraIndex(int cameraIndex) {
@@ -437,7 +442,7 @@ public class ESHardVideoCore implements ESVideoCore {
 //                } else {
 //                    directionFlag = resCoreParameters.backCameraDirectionMode;
 //                }
-                camera2dTextureVerticesBuffer = GLHelper.getCamera2DTextureVerticesBuffer(ROTATION_90, 0.0f);
+                camera2dTextureVerticesBuffer = VertexArray.initCamera2DTextureVerticesBuffer(ROTATION_90, 0.0f);
             }
         }
 
@@ -523,7 +528,7 @@ public class ESHardVideoCore implements ESVideoCore {
                 GLHelper.makeCurrent(screenGLWapper);
                 GLES20.glUseProgram(screenGLWapper.drawProgram);
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, frameBufferTexture);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, sample2DFrameBufferTexture);
                 GLES20.glUniform1i(screenGLWapper.drawTextureLoc, 0);
                 GLHelper.enableVertex(screenGLWapper.drawPostionLoc, screenGLWapper.drawTextureCoordLoc,
                         shapeVerticesBuffer, screenTextureVerticesBuffer);
