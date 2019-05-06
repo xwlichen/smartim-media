@@ -10,7 +10,7 @@ import com.smart.im.media.bean.PushConfig;
  * @email : 1960003945@qq.com
  * @description :
  */
-public interface  ILivePusher {
+public interface ILivePusher {
 
     void init(Context context, PushConfig pushConfig);
 

@@ -3,7 +3,6 @@ package com.smart.im.media.push;
 import android.content.Context;
 import android.view.SurfaceView;
 import android.view.TextureView;
-import android.view.View;
 
 import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
@@ -39,8 +38,8 @@ public class SmartLivePusher implements ILivePusher {
         audioPusher = new AudioPusher(liveBridge);
 
         liveBridge.initLivePushConfig(config);
-        videoPusher.init(context,config);
-        audioPusher.init(context,config);
+        videoPusher.init(context, config);
+        audioPusher.init(context, config);
     }
 
     @Override

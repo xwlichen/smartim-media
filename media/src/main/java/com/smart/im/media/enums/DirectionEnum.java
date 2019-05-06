@@ -6,7 +6,7 @@ package com.smart.im.media.enums;
  * @email : 1960003945@qq.com
  * @description :
  */
-public enum  DirectionEnum {
+public enum DirectionEnum {
     /**
      * 垂直
      */
@@ -34,7 +34,7 @@ public enum  DirectionEnum {
     ROTATION_270(270);
 
 
-    private int duration=-1;
+    private int duration = -1;
 
     DirectionEnum(int duration) {
         this.duration = duration;

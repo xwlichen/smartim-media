@@ -5,11 +5,8 @@ import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.TextureView;
-import android.view.View;
 
 import java.io.IOException;
 import java.util.List;
@@ -65,7 +62,7 @@ public class CameraUtil {
      * @param width
      * @param height
      */
-    public  static Camera.Size  choosePreviewSize(Camera.Parameters parms, int width, int height) {
+    public static Camera.Size choosePreviewSize(Camera.Parameters parms, int width, int height) {
         //先判断是否支持该分辨率
         Camera.Size resultSize = null;
         for (Camera.Size size : parms.getSupportedPreviewSizes()) {
@@ -85,7 +82,7 @@ public class CameraUtil {
             }
         }
         if (resultSize == null) {
-           resultSize = parms.getPreferredPreviewSizeForVideo();
+            resultSize = parms.getPreferredPreviewSizeForVideo();
         }
         return resultSize;
     }

@@ -63,8 +63,8 @@ public class PushConfig {
     }
 
 
-    public static PushConfig obtain(){
-        PushConfig config=new PushConfig();
+    public static PushConfig obtain() {
+        PushConfig config = new PushConfig();
         config.setWidth(640);
         config.setHeight(480);
         config.setPreviewWidth(640);

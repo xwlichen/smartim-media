@@ -49,7 +49,6 @@ public class TextureHelper {
     }
 
 
-
     public static int loadTextureByBitmap(Bitmap bitmap) {
         final int[] textureObjectIds = new int[1];
         glGenTextures(1, textureObjectIds, 0);

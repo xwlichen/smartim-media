@@ -3,7 +3,6 @@ package com.smart.im.media.test.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-
 import com.smart.im.media.test.MainApplication;
 
 import java.lang.reflect.InvocationTargetException;

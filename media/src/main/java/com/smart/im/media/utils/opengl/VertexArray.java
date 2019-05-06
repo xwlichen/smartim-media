@@ -1,9 +1,5 @@
 package com.smart.im.media.utils.opengl;
 
-import android.opengl.GLES20;
-
-
-import com.smart.im.media.Constants;
 import com.smart.im.media.enums.DirectionEnum;
 
 import java.nio.ByteBuffer;
@@ -11,7 +7,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-import static android.opengl.GLES20.GL_FLOAT;
 import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices;
 import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices_180;
 import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices_270;
@@ -29,7 +24,7 @@ import static com.smart.im.media.enums.DirectionEnum.ROTATION_180;
  */
 public class VertexArray {
 
-    public static FloatBuffer initFloatBuffer(float[] data,int size) {
+    public static FloatBuffer initFloatBuffer(float[] data, int size) {
         FloatBuffer result = ByteBuffer.allocateDirect(size * data.length).
                 order(ByteOrder.nativeOrder()).
                 asFloatBuffer();
@@ -38,7 +33,7 @@ public class VertexArray {
         return result;
     }
 
-    public static ShortBuffer initShortBuffer(short[] data,int size) {
+    public static ShortBuffer initShortBuffer(short[] data, int size) {
         ShortBuffer result = ByteBuffer.allocateDirect(size * data.length).
                 order(ByteOrder.nativeOrder()).
                 asShortBuffer();
@@ -98,13 +93,13 @@ public class VertexArray {
         }
 
 
-        if (direction== DirectionEnum.FLIP_HORIZONTAL){
+        if (direction == DirectionEnum.FLIP_HORIZONTAL) {
             buffer[0] = flip(buffer[0]);
             buffer[2] = flip(buffer[2]);
             buffer[4] = flip(buffer[4]);
             buffer[6] = flip(buffer[6]);
         }
-        if (direction ==DirectionEnum.FILP_VERTICAL) {
+        if (direction == DirectionEnum.FILP_VERTICAL) {
             buffer[1] = flip(buffer[1]);
             buffer[3] = flip(buffer[3]);
             buffer[5] = flip(buffer[5]);

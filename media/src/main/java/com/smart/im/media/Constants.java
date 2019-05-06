@@ -9,6 +9,4 @@ package com.smart.im.media;
 public interface Constants {
 
 
-
-
 }

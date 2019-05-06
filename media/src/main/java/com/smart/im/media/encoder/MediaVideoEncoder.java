@@ -253,8 +253,12 @@ public class MediaVideoEncoder extends MediaEncoder {
     }
 
     public float[] getMvpMatrix() {
-        if (previewW < 1 || previewH < 1) {return null;}
-        if (isMatrixCalc) {return mvpMatrix;}
+        if (previewW < 1 || previewH < 1) {
+            return null;
+        }
+        if (isMatrixCalc) {
+            return mvpMatrix;
+        }
 
         float encodeWHRatio = mWidth * 1.0f / mHeight;
         float previewWHRatio = previewW * 1.0f / previewH;

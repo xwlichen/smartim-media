@@ -1,6 +1,5 @@
 package com.smart.im.media.utils.opengl;
 
-import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.opengl.EGL14;
 import android.opengl.EGLConfig;
@@ -9,18 +8,13 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
 import com.blankj.utilcode.util.LogUtils;
-import com.smart.im.media.Constants;
-import com.smart.im.media.OpenGLConstants;
 import com.smart.im.media.bean.MediaCodecGLWapper;
 import com.smart.im.media.bean.OffScreenGLWapper;
 import com.smart.im.media.bean.ScreenGLWapper;
-import com.smart.im.media.enums.DirectionEnum;
-import com.smart.im.media.utils.GLShaderUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.egl.EGL10;
 
@@ -32,8 +26,6 @@ import static com.smart.im.media.OpenGLConstants.FRAGMENT_SHADER_CAMERA2D;
 import static com.smart.im.media.OpenGLConstants.TEXTURE_COORDS_PER_VERTEX;
 import static com.smart.im.media.OpenGLConstants.VERTEX_SHADER;
 import static com.smart.im.media.OpenGLConstants.VERTEX_SHADER_CAMERA2D;
-import static com.smart.im.media.enums.DirectionEnum.ROTATION_0;
-import static com.smart.im.media.enums.DirectionEnum.ROTATION_180;
 import static com.smart.im.media.utils.opengl.VertexArray.flip2;
 
 /**
@@ -245,7 +237,6 @@ public class GLHelper {
     }
 
 
-
     /**
      * 根据pushconfig的镜像相关参数设置纹理的坐标缓冲区
      *
@@ -291,8 +282,6 @@ public class GLHelper {
         }
         return rotatedTex;
     }
-
-
 
 
     /**

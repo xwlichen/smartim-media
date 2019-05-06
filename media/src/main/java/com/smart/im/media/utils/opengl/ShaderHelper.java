@@ -17,6 +17,7 @@ public class ShaderHelper {
 
     /**
      * 编译顶点着色器
+     *
      * @param shaderCode
      * @return shaderId
      */
@@ -27,6 +28,7 @@ public class ShaderHelper {
 
     /**
      * 编译片段着色器
+     *
      * @param shaderCode
      * @return shaderId
      */
@@ -37,7 +39,8 @@ public class ShaderHelper {
 
     /**
      * 根据类型编译着色器
-     * @param type 着色器类型
+     *
+     * @param type       着色器类型
      * @param shaderCode 主色器的代码
      * @return shaderId
      */
@@ -52,7 +55,7 @@ public class ShaderHelper {
         //加载shader的源代码
         GLES20.glShaderSource(shaderId, shaderCode);
         //编译shader
-        GLES20. glCompileShader(shaderId);
+        GLES20.glCompileShader(shaderId);
         //存放编译成功shader数量的数组
         final int[] compileStatsu = new int[1];
         //获取Shader的编译情况
@@ -67,6 +70,7 @@ public class ShaderHelper {
 
     /**
      * 创建、链接程序
+     *
      * @param vertexShaderId
      * @param fragmentShaderId
      * @return programId
@@ -101,6 +105,7 @@ public class ShaderHelper {
 
     /**
      * 检验程序
+     *
      * @param programId
      * @return boolean
      */
@@ -119,7 +124,8 @@ public class ShaderHelper {
 
     /**
      * 创建程序
-     * @param vertexShaderSource 顶点着色器代码
+     *
+     * @param vertexShaderSource   顶点着色器代码
      * @param fragmentShaderSource 片元着色器代码
      * @return programId
      */
@@ -141,8 +147,9 @@ public class ShaderHelper {
 
     /**
      * 创建程序（resource）
+     *
      * @param context
-     * @param vertexShaderSource 存放顶点着色器代码resource id
+     * @param vertexShaderSource   存放顶点着色器代码resource id
      * @param fragmentShaderSource 存放片元着色器代码resource id
      * @return programId
      */
@@ -156,8 +163,9 @@ public class ShaderHelper {
 
     /**
      * 创建程序（resource）
+     *
      * @param context
-     * @param vertexFileName 存放顶点着色器代码文件名
+     * @param vertexFileName   存放顶点着色器代码文件名
      * @param fragmentFileName 存放片元着色器代码文件名
      * @return programId
      */

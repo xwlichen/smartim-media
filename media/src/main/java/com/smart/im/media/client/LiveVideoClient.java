@@ -71,7 +71,7 @@ public class LiveVideoClient {
                     LogUtils.e("LiveVideoClient start() failed");
                     return false;
                 }
-                 liveVideoCore.updateCamTexture(camTexture);
+                liveVideoCore.updateCamTexture(camTexture);
             }
             liveVideoCore.startPreview(surfaceTexture, visualWidth, visualHeight);
             isPreviewing = true;

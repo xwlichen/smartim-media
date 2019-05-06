@@ -20,9 +20,10 @@ public interface LiveVideoCore {
 
     /**
      * 预览
+     *
      * @param surfaceTexture
-     * @param visualWidth  TextureView的宽
-     * @param visualHeight TextureView的高
+     * @param visualWidth    TextureView的宽
+     * @param visualHeight   TextureView的高
      */
     void startPreview(SurfaceTexture surfaceTexture, int visualWidth, int visualHeight);
 

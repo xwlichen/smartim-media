@@ -17,13 +17,13 @@ public class AudioPusher implements ILivePusher, AudioDataListener {
 
     private LiveBridge liveBridge;
     private AudioRecordManager audioRecordManager;
-    private boolean isPush=false;
+    private boolean isPush = false;
 
 
-    public AudioPusher(LiveBridge liveBridge){
-        this.liveBridge=liveBridge;
+    public AudioPusher(LiveBridge liveBridge) {
+        this.liveBridge = liveBridge;
 
-        audioRecordManager=new AudioRecordManager();
+        audioRecordManager = new AudioRecordManager();
         audioRecordManager.setAudioDataListener(this);
     }
 
@@ -40,7 +40,7 @@ public class AudioPusher implements ILivePusher, AudioDataListener {
 
     @Override
     public void startPush() {
-        isPush=true;
+        isPush = true;
         audioRecordManager.startRecord();
 
     }
@@ -67,7 +67,7 @@ public class AudioPusher implements ILivePusher, AudioDataListener {
 
     @Override
     public void stopPush() {
-        isPush=false;
+        isPush = false;
 
     }
 
@@ -75,7 +75,7 @@ public class AudioPusher implements ILivePusher, AudioDataListener {
     @Override
     public void audioData(byte[] data) {
 
-        if (isPush){
+        if (isPush) {
             liveBridge.pushAudioData(data);
         }
     }

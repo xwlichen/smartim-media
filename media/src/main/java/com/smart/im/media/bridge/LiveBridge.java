@@ -19,12 +19,13 @@ public class LiveBridge {
 
     public native void initVideoConfig(int width, int height, int bitRate, int frameRate);
 
-    public native void initAudioConfig(int numChannels,int sampleRate, int bitRate);
+    public native void initAudioConfig(int numChannels, int sampleRate, int bitRate);
 
 
     public native void initRtmp(String url);
 
     public native void pushVideoData(byte[] data);
+
     public native void pushAudioData(byte[] data);
 
 

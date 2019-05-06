@@ -15,10 +15,10 @@ import android.os.Message;
 import android.os.SystemClock;
 
 import com.blankj.utilcode.util.LogUtils;
-import com.smart.im.media.bean.MediaCodecGLWapper;
-import com.smart.im.media.bean.PushConfig;
-import com.smart.im.media.bean.OffScreenGLWapper;
 import com.smart.im.media.bean.FrameRateMeter;
+import com.smart.im.media.bean.MediaCodecGLWapper;
+import com.smart.im.media.bean.OffScreenGLWapper;
+import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bean.ScreenGLWapper;
 import com.smart.im.media.bean.Size;
 import com.smart.im.media.encoder.MediaVideoEncoder;
@@ -138,7 +138,6 @@ public class LiveHardVideoCore implements LiveVideoCore {
         private final Object syncCameraTextureVerticesBuffer = new Object();
 
 
-
         static final int WHAT_INIT = 0x001;
         static final int WHAT_UNINIT = 0x002;
         static final int WHAT_FRAME = 0x003;
@@ -178,7 +177,6 @@ public class LiveHardVideoCore implements LiveVideoCore {
         public static final int FILTER_LOCK_TOLERATION = 3;//3ms
 
         private FrameRateMeter drawFrameRateMeter;
-
 
 
         public VideoGLHandler(Looper looper) {
@@ -243,7 +241,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
                         }
                     }
 
-                    LogUtils.e("hasNewFrame:",hasNewFrame);
+                    LogUtils.e("hasNewFrame:", hasNewFrame);
                     if (hasNewFrame) {
                         //共享texture
                         drawFrameBuffer();
@@ -325,6 +323,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
 
         /**
          * 更新预览界面的尺寸
+         *
          * @param w
          * @param h
          */
@@ -335,6 +334,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
 
         /**
          * 更新ESVideoClient传过来的SurfaceTexture
+         *
          * @param surfaceTexture
          */
         public void updateCamTexture(SurfaceTexture surfaceTexture) {
@@ -358,10 +358,11 @@ public class LiveHardVideoCore implements LiveVideoCore {
 
         /**
          * 绘制2d 帧缓冲数据
+         *
          * @param cameraTexture
          */
         private void drawSample2DFrameBuffer(SurfaceTexture cameraTexture) {
-            if(pushConfig.isPreviewMirror()||pushConfig.isPushMirror()){
+            if (pushConfig.isPreviewMirror() || pushConfig.isPushMirror()) {
                 screenTextureVerticesBuffer = GLHelper.adjustTextureFlip(pushConfig.isPreviewMirror());
                 mediaCodecTextureVerticesBuffer = GLHelper.adjustTextureFlip(pushConfig.isPushMirror());
             }
@@ -426,12 +427,12 @@ public class LiveHardVideoCore implements LiveVideoCore {
 
 
         private void initBuffer() {
-            shapeVerticesBuffer = VertexArray.initFloatBuffer(SquareVertices,FLOAT_SIZE_BYTES);
-            mediaCodecTextureVerticesBuffer = VertexArray.initFloatBuffer(MediaCodecTextureVertices,FLOAT_SIZE_BYTES);
-            screenTextureVerticesBuffer = VertexArray.initFloatBuffer(ScreenTextureVertices,FLOAT_SIZE_BYTES);
+            shapeVerticesBuffer = VertexArray.initFloatBuffer(SquareVertices, FLOAT_SIZE_BYTES);
+            mediaCodecTextureVerticesBuffer = VertexArray.initFloatBuffer(MediaCodecTextureVertices, FLOAT_SIZE_BYTES);
+            screenTextureVerticesBuffer = VertexArray.initFloatBuffer(ScreenTextureVertices, FLOAT_SIZE_BYTES);
             updateCameraIndex(1);
-            drawIndecesBuffer = VertexArray.initShortBuffer(DrawIndices,SHORT_SIZE_BYTES);
-            cameraTextureVerticesBuffer = VertexArray.initFloatBuffer(Cam2dTextureVertices,FLOAT_SIZE_BYTES);
+            drawIndecesBuffer = VertexArray.initShortBuffer(DrawIndices, SHORT_SIZE_BYTES);
+            cameraTextureVerticesBuffer = VertexArray.initFloatBuffer(Cam2dTextureVertices, FLOAT_SIZE_BYTES);
         }
 
         public void updateCameraIndex(int cameraIndex) {
@@ -445,9 +446,6 @@ public class LiveHardVideoCore implements LiveVideoCore {
                 camera2dTextureVerticesBuffer = VertexArray.initCamera2DTextureVerticesBuffer(ROTATION_90, 0.0f);
             }
         }
-
-
-
 
 
         private void drawFrameBuffer() {
@@ -474,9 +472,9 @@ public class LiveHardVideoCore implements LiveVideoCore {
 //                }
 //                unlockVideoFilter();
 //            } else {
-                drawOriginFrameBuffer();
+            drawOriginFrameBuffer();
 //            }
-            LogUtils.d("滤镜耗时："+(System.currentTimeMillis()-starttime));
+            LogUtils.d("滤镜耗时：" + (System.currentTimeMillis() - starttime));
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer);
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         }
@@ -556,7 +554,8 @@ public class LiveHardVideoCore implements LiveVideoCore {
         private void unlockVideoFilter() {
             lockVideoFilter.unlock();
         }
-        public int getBufferTexture(){
+
+        public int getBufferTexture() {
             return frameBufferTexture;
         }
 
