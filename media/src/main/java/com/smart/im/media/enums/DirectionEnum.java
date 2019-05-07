@@ -7,6 +7,7 @@ package com.smart.im.media.enums;
  * @description :
  */
 public enum DirectionEnum {
+    FILP_DEFAULT(-1),
     /**
      * 垂直
      */

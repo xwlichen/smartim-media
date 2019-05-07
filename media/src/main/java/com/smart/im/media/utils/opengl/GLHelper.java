@@ -178,7 +178,7 @@ public class GLHelper {
         return ShaderHelper.buildProgram(VERTEX_SHADER, FRAGMENT_SHADER_2D);
     }
 
-    public static void createCamFrameBuff(int[] frameBuffer, int[] frameBufferTex, int width, int height) {
+    public static void createFrameBuff(int[] frameBuffer, int[] frameBufferTex, int width, int height) {
         //创建FBO
         GLES20.glGenFramebuffers(1, frameBuffer, 0);
         //创建FBO纹理

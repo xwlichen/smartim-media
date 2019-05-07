@@ -290,10 +290,10 @@ public class LiveHardVideoCore implements LiveVideoCore {
 
                 //opengl 帧缓冲的创建
                 int[] fb = new int[1], fbt = new int[1];
-                GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
+                GLHelper.createFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
                 sample2DFrameBuffer = fb[0];
                 sample2DFrameBufferTexture = fbt[0];
-                GLHelper.createCamFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
+                GLHelper.createFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
                 frameBuffer = fb[0];
                 frameBufferTexture = fbt[0];
             }
