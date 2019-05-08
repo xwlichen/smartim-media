@@ -122,4 +122,5 @@ public interface OpenGLConstants {
     int SHORT_SIZE_BYTES = 2;
     int COORDS_PER_VERTEX = 2;
     int TEXTURE_COORDS_PER_VERTEX = 2;
+    int NO_TEXTURE = -1;
 }

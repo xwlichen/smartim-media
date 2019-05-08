@@ -49,9 +49,12 @@ public class GPUImageCompatibleFilter<T extends GPUImageFilter> extends BaseHard
 
     @Override
     public void onDirectionUpdate(DirectionEnum _direction) {
+
         if (direction != _direction) {
+            direction = _direction;
             innerShapeBuffer = getGPUImageCompatShapeVerticesBuffer();
             innerTextureBuffer = getGPUImageCompatTextureVerticesBuffer(direction);
+
         }
     }
 
@@ -98,31 +101,42 @@ public class GPUImageCompatibleFilter<T extends GPUImageFilter> extends BaseHard
 
     public static FloatBuffer getGPUImageCompatTextureVerticesBuffer(final DirectionEnum direction) {
         float[] buffer;
-        switch (direction) {
-            case ROTATION_90:
-                buffer = TEXTURE_ROTATED_90.clone();
-                break;
-            case ROTATION_180:
-                buffer = TEXTURE_ROTATED_180.clone();
-                break;
-            case ROTATION_270:
-                buffer = TEXTURE_ROTATED_270.clone();
-                break;
-            default:
-                buffer = TEXTURE_NO_ROTATION.clone();
-        }
-        if (direction == DirectionEnum.FLIP_HORIZONTAL) {
-            buffer[0] = flip(buffer[0]);
-            buffer[2] = flip(buffer[2]);
-            buffer[4] = flip(buffer[4]);
-            buffer[6] = flip(buffer[6]);
-        }
-        if (direction == DirectionEnum.FILP_VERTICAL) {
-            buffer[1] = flip(buffer[1]);
-            buffer[3] = flip(buffer[3]);
-            buffer[5] = flip(buffer[5]);
-            buffer[7] = flip(buffer[7]);
-        }
+        buffer = TEXTURE_ROTATED_180.clone();
+
+//        switch (direction) {
+//            case ORIENTATION_PORTRAIT:
+//                buffer = TEXTURE_ROTATED_180.clone();
+//                LogUtils.e("GPUImageCompatibleFilter ORIENTATION_PORTRAIT");
+//
+//                break;
+//            case ORIENTATION_LANDSCAPE_HOME_RIGHT:
+//                buffer = TEXTURE_ROTATED_180.clone();
+//                LogUtils.e("GPUImageCompatibleFilter ORIENTATION_LANDSCAPE_HOME_RIGHT");
+//
+//
+//                break;
+//            case ORIENTATION_LANDSCAPE_HOME_LEFT:
+//                buffer = TEXTURE_ROTATED_180.clone();
+//                LogUtils.e("GPUImageCompatibleFilter ORIENTATION_LANDSCAPE_HOME_LEFT");
+//
+//                break;
+//            default:
+//                buffer = TEXTURE_ROTATED_180.clone();
+//                LogUtils.e("GPUImageCompatibleFilter default");
+//
+//        }
+//        if (direction == ORIENTATION_LANDSCAPE_HOME_LEFT||direction ==ORIENTATION_LANDSCAPE_HOME_RIGHT) {
+//            buffer[0] = flip(buffer[0]);
+//            buffer[2] = flip(buffer[2]);
+//            buffer[4] = flip(buffer[4]);
+//            buffer[6] = flip(buffer[6]);
+//        }
+//        if (direction == ORIENTATION_PORTRAIT) {
+//            buffer[1] = flip(buffer[1]);
+//            buffer[3] = flip(buffer[3]);
+//            buffer[5] = flip(buffer[5]);
+//            buffer[7] = flip(buffer[7]);
+//        }
         FloatBuffer result = ByteBuffer.allocateDirect(OpenGLConstants.FLOAT_SIZE_BYTES * buffer.length).
                 order(ByteOrder.nativeOrder()).
                 asFloatBuffer();

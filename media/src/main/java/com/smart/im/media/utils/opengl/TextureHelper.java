@@ -3,6 +3,8 @@ package com.smart.im.media.utils.opengl;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
 
 import com.blankj.utilcode.util.LogUtils;
 
@@ -16,6 +18,7 @@ import static android.opengl.GLES20.glGenTextures;
 import static android.opengl.GLES20.glGenerateMipmap;
 import static android.opengl.GLES20.glTexParameteri;
 import static android.opengl.GLUtils.texImage2D;
+import static com.smart.im.media.OpenGLConstants.NO_TEXTURE;
 
 /**
  * @date : 2019/4/22 下午3:53
@@ -78,6 +81,30 @@ public class TextureHelper {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         return textureObjectIds[0];
+    }
+
+
+    public static int loadTextureByBitmap(final Bitmap image, final int reUseTexture) {
+        int[] texture = new int[1];
+        if (reUseTexture == NO_TEXTURE) {
+            GLES20.glGenTextures(1, texture, 0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture[0]);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+            GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+                    GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, image, 0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
+        } else {
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, reUseTexture);
+            GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, image);
+            texture[0] = reUseTexture;
+        }
+        return texture[0];
     }
 
 

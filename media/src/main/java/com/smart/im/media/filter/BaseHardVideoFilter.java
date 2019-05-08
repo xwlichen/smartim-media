@@ -8,7 +8,7 @@ import java.nio.ShortBuffer;
 
 import static com.smart.im.media.OpenGLConstants.DrawIndices;
 import static com.smart.im.media.OpenGLConstants.SHORT_SIZE_BYTES;
-import static com.smart.im.media.enums.DirectionEnum.FILP_DEFAULT;
+import static com.smart.im.media.enums.DirectionEnum.ORIENTATION_NUll;
 
 /**
  * @date : 2019/5/7 下午4:06
@@ -20,7 +20,7 @@ public class BaseHardVideoFilter {
 
     protected int SIZE_WIDTH;
     protected int SIZE_HEIGHT;
-    protected DirectionEnum direction = FILP_DEFAULT;
+    protected DirectionEnum direction = ORIENTATION_NUll;
     protected ShortBuffer drawIndecesBuffer;
 
     public void onInit(int VWidth, int VHeight) {

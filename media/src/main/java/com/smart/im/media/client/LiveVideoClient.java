@@ -9,9 +9,13 @@ import com.smart.im.media.core.LiveHardVideoCore;
 import com.smart.im.media.core.LiveVideoCore;
 import com.smart.im.media.enums.EncodeEnum;
 import com.smart.im.media.enums.ResolutionEnum;
+import com.smart.im.media.filter.BaseHardVideoFilter;
 import com.smart.im.media.utils.CameraUtil;
 
 import java.io.IOException;
+
+import static com.smart.im.media.enums.DirectionEnum.ORIENTATION_LANDSCAPE_HOME_LEFT;
+import static com.smart.im.media.enums.DirectionEnum.ORIENTATION_LANDSCAPE_HOME_RIGHT;
 
 /**
  * @date : 2019/4/10 下午4:52
@@ -50,8 +54,15 @@ public class LiveVideoClient {
                 ResolutionEnum.getResolutionWidth(pushConfig.getResolution()),
                 ResolutionEnum.getResolutionHeight(pushConfig.getResolution()));
 
-        pushConfig.setPreviewWidth(size.width);
-        pushConfig.setPreviewHeight(size.height);
+        if (ORIENTATION_LANDSCAPE_HOME_RIGHT == pushConfig.getDirection() || ORIENTATION_LANDSCAPE_HOME_LEFT == pushConfig.getDirection()) {
+            pushConfig.setPreviewWidth(Math.max(size.width, size.height));
+            pushConfig.setPreviewHeight(Math.min(size.width, size.height));
+        } else {
+
+            pushConfig.setPreviewWidth(Math.min(size.width, size.height));
+            pushConfig.setPreviewHeight(Math.max(size.width, size.height));
+        }
+
         if (pushConfig.getEndcoderType() == EncodeEnum.HARD) {
             liveVideoCore = new LiveHardVideoCore(pushConfig);
         }
@@ -59,6 +70,7 @@ public class LiveVideoClient {
         if (!liveVideoCore.prepare()) {
             return false;
         }
+        liveVideoCore.setCurrentCamera(pushConfig.getCameraType());
 
         return true;
     }
@@ -80,6 +92,12 @@ public class LiveVideoClient {
         }
     }
 
+
+    public void setHardVideoFilter(BaseHardVideoFilter baseHardVideoFilter) {
+        if (pushConfig.getEndcoderType() == EncodeEnum.HARD) {
+            ((LiveHardVideoCore) liveVideoCore).setHardVideoFilter(baseHardVideoFilter);
+        }
+    }
 
     public boolean setCameraListener() {
         camTexture = new SurfaceTexture(LiveVideoCore.OVERWATCH_TEXTURE_ID);

@@ -9,12 +9,10 @@ import java.nio.ShortBuffer;
 
 import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices;
 import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices_180;
-import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices_270;
 import static com.smart.im.media.OpenGLConstants.Cam2dTextureVertices_90;
-import static com.smart.im.media.OpenGLConstants.CamTextureVertices;
 import static com.smart.im.media.OpenGLConstants.FLOAT_SIZE_BYTES;
-import static com.smart.im.media.enums.DirectionEnum.ROTATION_0;
-import static com.smart.im.media.enums.DirectionEnum.ROTATION_180;
+import static com.smart.im.media.enums.DirectionEnum.ORIENTATION_NUll;
+import static com.smart.im.media.enums.DirectionEnum.ORIENTATION_PORTRAIT;
 
 /**
  * @date : 2019/4/18 下午3:15
@@ -44,29 +42,31 @@ public class VertexArray {
 
 
     public static FloatBuffer initCamera2DTextureVerticesBuffer(final DirectionEnum direction, final float cropRatio) {
-        if (direction.getDuration() == -1) {
+        if (direction == ORIENTATION_NUll) {
             FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * Cam2dTextureVertices.length).
                     order(ByteOrder.nativeOrder()).
                     asFloatBuffer();
-            result.put(CamTextureVertices);
+            result.put(Cam2dTextureVertices);
             result.position(0);
             return result;
         }
         float[] buffer;
         switch (direction) {
-            case ROTATION_90:
+            case ORIENTATION_PORTRAIT:
                 buffer = Cam2dTextureVertices_90.clone();
+
                 break;
-            case ROTATION_180:
+            case ORIENTATION_LANDSCAPE_HOME_RIGHT:
+                buffer = Cam2dTextureVertices.clone();
+                break;
+            case ORIENTATION_LANDSCAPE_HOME_LEFT:
                 buffer = Cam2dTextureVertices_180.clone();
-                break;
-            case ROTATION_270:
-                buffer = Cam2dTextureVertices_270.clone();
                 break;
             default:
                 buffer = Cam2dTextureVertices.clone();
+                break;
         }
-        if (direction == ROTATION_0 || direction == ROTATION_180) {
+        if (direction == ORIENTATION_PORTRAIT) {
             if (cropRatio > 0) {
                 buffer[1] = buffer[1] == 1.0f ? (1.0f - cropRatio) : cropRatio;
                 buffer[3] = buffer[3] == 1.0f ? (1.0f - cropRatio) : cropRatio;
@@ -93,18 +93,18 @@ public class VertexArray {
         }
 
 
-        if (direction == DirectionEnum.FLIP_HORIZONTAL) {
-            buffer[0] = flip(buffer[0]);
-            buffer[2] = flip(buffer[2]);
-            buffer[4] = flip(buffer[4]);
-            buffer[6] = flip(buffer[6]);
-        }
-        if (direction == DirectionEnum.FILP_VERTICAL) {
-            buffer[1] = flip(buffer[1]);
-            buffer[3] = flip(buffer[3]);
-            buffer[5] = flip(buffer[5]);
-            buffer[7] = flip(buffer[7]);
-        }
+//        if (direction == ORIENTATION_LANDSCAPE_HOME_LEFT || direction == ORIENTATION_LANDSCAPE_HOME_RIGHT) {
+//            buffer[0] = flip(buffer[0]);
+//            buffer[2] = flip(buffer[2]);
+//            buffer[4] = flip(buffer[4]);
+//            buffer[6] = flip(buffer[6]);
+//        }
+//        if (direction == ORIENTATION_PORTRAIT) {
+//            buffer[1] = flip(buffer[1]);
+//            buffer[3] = flip(buffer[3]);
+//            buffer[5] = flip(buffer[5]);
+//            buffer[7] = flip(buffer[7]);
+//        }
         FloatBuffer result = ByteBuffer.allocateDirect(FLOAT_SIZE_BYTES * buffer.length).
                 order(ByteOrder.nativeOrder()).
                 asFloatBuffer();

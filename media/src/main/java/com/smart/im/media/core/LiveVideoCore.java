@@ -30,4 +30,6 @@ public interface LiveVideoCore {
 
     void updateCamTexture(SurfaceTexture camTex);
 
+
+    void setCurrentCamera(int cameraIndex);
 }

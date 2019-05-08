@@ -7,45 +7,34 @@ package com.smart.im.media.enums;
  * @description :
  */
 public enum DirectionEnum {
-    FILP_DEFAULT(-1),
+    /**
+     * 空值
+     */
+    ORIENTATION_NUll(-1),
     /**
      * 垂直
      */
-    FILP_VERTICAL(1),
+    ORIENTATION_PORTRAIT(0),
     /**
-     * 水平
+     * 水平右
      */
-    FLIP_HORIZONTAL(2),
+    ORIENTATION_LANDSCAPE_HOME_RIGHT(90),
+    /**
+     * 水平左
+     */
+    ORIENTATION_LANDSCAPE_HOME_LEFT(270);
 
-    /**
-     * 旋转0度
-     */
-    ROTATION_0(0),
-    /**
-     * 旋转90度
-     */
-    ROTATION_90(90),
-    /**
-     * 旋转180度
-     */
-    ROTATION_180(180),
-    /**
-     * 旋转270度
-     */
-    ROTATION_270(270);
+    private int direction = -1;
 
-
-    private int duration = -1;
-
-    DirectionEnum(int duration) {
-        this.duration = duration;
+    DirectionEnum(int direction) {
+        this.direction = direction;
     }
 
-    public int getDuration() {
-        return duration;
+    public int getDirection() {
+        return direction;
     }
 
-    public void setDuration(int duration) {
-        this.duration = duration;
+    public void setDirection(int direction) {
+        this.direction = direction;
     }
 }

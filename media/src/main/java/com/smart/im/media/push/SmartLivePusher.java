@@ -6,6 +6,7 @@ import android.view.TextureView;
 
 import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
+import com.smart.im.media.filter.BaseHardVideoFilter;
 
 /**
  * @date : 2019/3/12 下午4:03
@@ -33,19 +34,20 @@ public class SmartLivePusher implements ILivePusher {
         this.config = config;
         this.context = context;
 
-        liveBridge = new LiveBridge();
+//        liveBridge = new LiveBridge();
         videoPusher = new VideoPusher(liveBridge);
         audioPusher = new AudioPusher(liveBridge);
 
-        liveBridge.initLivePushConfig(config);
+//        liveBridge.initLivePushConfig(config);
         videoPusher.init(context, config);
         audioPusher.init(context, config);
     }
 
-    @Override
-    public void destroy() {
 
+    public void setHardVideoFileter(BaseHardVideoFilter hardVideoFilter) {
+        videoPusher.setHardVideoFileter(hardVideoFilter);
     }
+
 
     public void startPreview(TextureView textureView) {
         videoPusher.startPreview(textureView);
@@ -91,6 +93,11 @@ public class SmartLivePusher implements ILivePusher {
     public void stopPush() {
         videoPusher.stopPush();
 //        audioPusher.stopPush();
+    }
+
+    @Override
+    public void destroy() {
+
     }
 
 

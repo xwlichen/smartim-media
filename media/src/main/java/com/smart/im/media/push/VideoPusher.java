@@ -8,6 +8,7 @@ import com.blankj.utilcode.util.LogUtils;
 import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
 import com.smart.im.media.client.LiveVideoClient;
+import com.smart.im.media.filter.BaseHardVideoFilter;
 
 /**
  * @date : 2019/3/12 下午3:52
@@ -40,6 +41,16 @@ public class VideoPusher implements ILivePusher {
         }
 
     }
+
+    public void setHardVideoFileter(BaseHardVideoFilter hardVideoFilter) {
+        if (liveVideoClient == null) {
+            LogUtils.e("liveVideoClient is null");
+            return;
+        }
+
+        liveVideoClient.setHardVideoFilter(hardVideoFilter);
+    }
+
 
     @Override
     public void destroy() {

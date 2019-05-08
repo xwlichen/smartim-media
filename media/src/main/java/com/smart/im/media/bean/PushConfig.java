@@ -3,6 +3,7 @@ package com.smart.im.media.bean;
 import android.hardware.Camera;
 import android.media.AudioFormat;
 
+import com.smart.im.media.enums.DirectionEnum;
 import com.smart.im.media.enums.EncodeEnum;
 import com.smart.im.media.enums.FpsEnum;
 import com.smart.im.media.enums.ResolutionEnum;
@@ -37,7 +38,10 @@ public class PushConfig {
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;//pcm16位
 
     private int cameraType = Camera.CameraInfo.CAMERA_FACING_FRONT;
+//    private int cameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
+
     private EncodeEnum endcoderType = EncodeEnum.HARD;
+    private DirectionEnum direction;
 
 
     /**
@@ -74,6 +78,11 @@ public class PushConfig {
         config.setFps(FpsEnum.FPS_25);
         config.setSampleRate(44100);
         config.setAudioBitRate(64000);
+        config.setDirection(DirectionEnum.ORIENTATION_PORTRAIT);
+//        config.setDirection(DirectionEnum.ORIENTATION_LANDSCAPE_HOME_RIGHT);
+//        config.setDirection(DirectionEnum.ORIENTATION_LANDSCAPE_HOME_LEFT);
+
+
 
         return config;
     }
@@ -213,6 +222,14 @@ public class PushConfig {
 
     public void setPreviewMirror(boolean previewMirror) {
         this.previewMirror = previewMirror;
+    }
+
+    public DirectionEnum getDirection() {
+        return direction;
+    }
+
+    public void setDirection(DirectionEnum direction) {
+        this.direction = direction;
     }
 
     @Override

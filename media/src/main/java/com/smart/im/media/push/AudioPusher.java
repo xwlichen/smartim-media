@@ -76,7 +76,7 @@ public class AudioPusher implements ILivePusher, AudioDataListener {
     public void audioData(byte[] data) {
 
         if (isPush) {
-            liveBridge.pushAudioData(data);
+//            liveBridge.pushAudioData(data);
         }
     }
 }

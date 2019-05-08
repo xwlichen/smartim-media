@@ -22,6 +22,8 @@ import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bean.ScreenGLWapper;
 import com.smart.im.media.bean.Size;
 import com.smart.im.media.encoder.MediaVideoEncoder;
+import com.smart.im.media.enums.DirectionEnum;
+import com.smart.im.media.filter.BaseHardVideoFilter;
 import com.smart.im.media.utils.opengl.GLHelper;
 import com.smart.im.media.utils.opengl.VertexArray;
 
@@ -38,7 +40,6 @@ import static com.smart.im.media.OpenGLConstants.MediaCodecTextureVertices;
 import static com.smart.im.media.OpenGLConstants.SHORT_SIZE_BYTES;
 import static com.smart.im.media.OpenGLConstants.ScreenTextureVertices;
 import static com.smart.im.media.OpenGLConstants.SquareVertices;
-import static com.smart.im.media.enums.DirectionEnum.ROTATION_90;
 
 /**
  * @date : 2019/4/9 下午3:40
@@ -76,6 +77,10 @@ public class LiveHardVideoCore implements LiveVideoCore {
      * 发送间隔，根据pushconfig的fps设置
      */
     private int loopingInterval;
+
+
+    private BaseHardVideoFilter videoFilter;
+
 
 
     public LiveHardVideoCore(PushConfig pushConfig) {
@@ -130,6 +135,32 @@ public class LiveHardVideoCore implements LiveVideoCore {
         }
     }
 
+    @Override
+    public void setCurrentCamera(int cameraIndex) {
+        mCameraId = cameraIndex;
+        synchronized (syncObj) {
+            if (videoGLHander != null) {
+                videoGLHander.updateCameraIndex(cameraIndex);
+            }
+        }
+    }
+
+
+    public BaseHardVideoFilter acquireVideoFilter() {
+        lockVideoFilter.lock();
+        return videoFilter;
+    }
+
+    public void releaseVideoFilter() {
+        lockVideoFilter.unlock();
+    }
+
+    public void setHardVideoFilter(BaseHardVideoFilter baseHardVideoFilter) {
+        lockVideoFilter.lock();
+        videoFilter = baseHardVideoFilter;
+        lockVideoFilter.unlock();
+    }
+
 
     private class VideoGLHandler extends Handler {
 
@@ -177,6 +208,11 @@ public class LiveHardVideoCore implements LiveVideoCore {
         public static final int FILTER_LOCK_TOLERATION = 3;//3ms
 
         private FrameRateMeter drawFrameRateMeter;
+        private BaseHardVideoFilter innerVideoFilter = null;
+        private DirectionEnum direction;
+        private int currCamera;
+
+
 
 
         public VideoGLHandler(Looper looper) {
@@ -242,7 +278,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
                         }
                     }
 
-                    LogUtils.e("hasNewFrame:", hasNewFrame);
+//                    LogUtils.e("hasNewFrame:", hasNewFrame);
                     if (hasNewFrame) {
                         //共享texture
                         drawFrameBuffer();
@@ -290,10 +326,10 @@ public class LiveHardVideoCore implements LiveVideoCore {
 
                 //opengl 帧缓冲的创建
                 int[] fb = new int[1], fbt = new int[1];
-                GLHelper.createFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
+                GLHelper.createFrameBuff(fb, fbt, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//pushConfig.videoWidth, pushConfig.videoHeight
                 sample2DFrameBuffer = fb[0];
                 sample2DFrameBufferTexture = fbt[0];
-                GLHelper.createFrameBuff(fb, fbt, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//pushConfig.videoWidth, pushConfig.videoHeight
+                GLHelper.createFrameBuff(fb, fbt, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//pushConfig.videoWidth, pushConfig.videoHeight
                 frameBuffer = fb[0];
                 frameBufferTexture = fbt[0];
             }
@@ -402,7 +438,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
 
             GLES20.glUniformMatrix4fv(offScreenGLWapper.cam2dTextureMatrix, 1, false, textureMatrix, 0);
             //设置视口大小
-            GLES20.glViewport(0, 0, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());//resCoreParameters.videoWidth, resCoreParameters.videoHeight
+            GLES20.glViewport(0, 0, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//resCoreParameters.videoWidth, resCoreParameters.videoHeight
             doGLDraw();
             //通知OpenGL渲染管线阻塞执行前面所有的指令
             GLES20.glFinish();
@@ -432,20 +468,16 @@ public class LiveHardVideoCore implements LiveVideoCore {
             shapeVerticesBuffer = VertexArray.initFloatBuffer(SquareVertices, FLOAT_SIZE_BYTES);
             mediaCodecTextureVerticesBuffer = VertexArray.initFloatBuffer(MediaCodecTextureVertices, FLOAT_SIZE_BYTES);
             screenTextureVerticesBuffer = VertexArray.initFloatBuffer(ScreenTextureVertices, FLOAT_SIZE_BYTES);
-            updateCameraIndex(1);
+            updateCameraIndex(currCamera);
             drawIndecesBuffer = VertexArray.initShortBuffer(DrawIndices, SHORT_SIZE_BYTES);
             cameraTextureVerticesBuffer = VertexArray.initFloatBuffer(Cam2dTextureVertices, FLOAT_SIZE_BYTES);
         }
 
         public void updateCameraIndex(int cameraIndex) {
             synchronized (syncCameraTextureVerticesBuffer) {
-//                currCamera = cameraIndex;
-//                if (currCamera == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-//                    directionFlag = resCoreParameters.frontCameraDirectionMode ^ RESConfig.DirectionMode.FLAG_DIRECTION_FLIP_HORIZONTAL;
-//                } else {
-//                    directionFlag = resCoreParameters.backCameraDirectionMode;
-//                }
-                camera2dTextureVerticesBuffer = VertexArray.initCamera2DTextureVerticesBuffer(ROTATION_90, 0.0f);
+                currCamera = cameraIndex;
+                direction = pushConfig.getDirection();
+                camera2dTextureVerticesBuffer = VertexArray.initCamera2DTextureVerticesBuffer(pushConfig.getDirection(), 0.0f);
             }
         }
 
@@ -454,28 +486,30 @@ public class LiveHardVideoCore implements LiveVideoCore {
             GLHelper.makeCurrent(offScreenGLWapper);
             boolean isFilterLocked = lockVideoFilter();
             long starttime = System.currentTimeMillis();
-//            if (isFilterLocked) {
-//                if (videoFilter != innerVideoFilter) {
-//                    if (innerVideoFilter != null) {
-//                        innerVideoFilter.onDestroy();
-//                    }
-//                    innerVideoFilter = videoFilter;
-//                    if (innerVideoFilter != null) {
-//                        innerVideoFilter.onInit(resCoreParameters.pre·viewVideoHeight, resCoreParameters.previewVideoWidth);//resCoreParameters.videoWidth, resCoreParameters.videoHeight
-//                    }
-//                }
-//                if (innerVideoFilter != null) {
-//                    synchronized (syncCameraTextureVerticesBuffer) {
-//                        innerVideoFilter.onDirectionUpdate(directionFlag);
-//                        innerVideoFilter.onDraw(sample2DFrameBufferTexture, frameBuffer, shapeVerticesBuffer, cameraTextureVerticesBuffer);
-//                    }
-//                } else {
-//                    drawOriginFrameBuffer();
-//                }
-//                unlockVideoFilter();
-//            } else {
-            drawOriginFrameBuffer();
-//            }
+            if (isFilterLocked) {
+                if (videoFilter != innerVideoFilter) {
+                    if (innerVideoFilter != null) {
+                        innerVideoFilter.onDestroy();
+                    }
+                    innerVideoFilter = videoFilter;
+                    if (innerVideoFilter != null) {
+                        LogUtils.e("onInit" + pushConfig.getPreviewWidth());
+
+                        innerVideoFilter.onInit(pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());//resCoreParameters.videoWidth, resCoreParameters.videoHeight
+                    }
+                }
+                if (innerVideoFilter != null) {
+                    synchronized (syncCameraTextureVerticesBuffer) {
+                        innerVideoFilter.onDirectionUpdate(direction);
+                        innerVideoFilter.onDraw(sample2DFrameBufferTexture, frameBuffer, shapeVerticesBuffer, cameraTextureVerticesBuffer);
+                    }
+                } else {
+                    drawOriginFrameBuffer();
+                }
+                unlockVideoFilter();
+            } else {
+                drawOriginFrameBuffer();
+            }
             LogUtils.d("滤镜耗时：" + (System.currentTimeMillis() - starttime));
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer);
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
@@ -512,8 +546,8 @@ public class LiveHardVideoCore implements LiveVideoCore {
                 GLHelper.enableVertex(offScreenGLWapper.camPostionLoc, offScreenGLWapper.camTextureCoordLoc,
                         shapeVerticesBuffer, cameraTextureVerticesBuffer);
             }
-            GLES20.glViewport(0, 0, pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());
-//            GLES20.glViewport(0, 0, 200, pushConfig.getPreviewHeight());
+            GLES20.glViewport(0, 0, pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());
+//            GLES20.glViewport(0, 0, 200, pushConfig.getPreviewWidth()()());
 
             doGLDraw();
             GLES20.glFinish();
@@ -521,6 +555,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
             GLES20.glUseProgram(0);
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
+            LogUtils.e("drawOriginFrameBuffer");
         }
 
         private void drawScreen() {
@@ -528,7 +563,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
                 GLHelper.makeCurrent(screenGLWapper);
                 GLES20.glUseProgram(screenGLWapper.drawProgram);
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, sample2DFrameBufferTexture);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, frameBufferTexture);
                 GLES20.glUniform1i(screenGLWapper.drawTextureLoc, 0);
                 GLHelper.enableVertex(screenGLWapper.drawPostionLoc, screenGLWapper.drawTextureCoordLoc,
                         shapeVerticesBuffer, screenTextureVerticesBuffer);
@@ -569,7 +604,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
                         mVideoEncoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHander.getBufferTexture());
                         mNeedResetEglContext = false;
                     }
-                    mVideoEncoder.setPreviewWH(pushConfig.getPreviewHeight(), pushConfig.getPreviewWidth());
+                    mVideoEncoder.setPreviewWH(pushConfig.getPreviewWidth(), pushConfig.getPreviewHeight());
                     mVideoEncoder.frameAvailableSoon(textureMatrix, mVideoEncoder.getMvpMatrix());
                 }
             }
