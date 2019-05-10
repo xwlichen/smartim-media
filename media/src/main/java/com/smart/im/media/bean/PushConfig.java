@@ -23,25 +23,30 @@ public class PushConfig {
     private int height = 480;
     private int previewWidth;
     private int previewHeight;
+    //    private int cameraType = Camera.CameraInfo.CAMERA_FACING_FRONT;
+    private int cameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
 
-    private int bitRate = 1500;//kb/s jason-->480kb
+    private EncodeEnum endcoderType = EncodeEnum.HARD;
+    private DirectionEnum direction;
+
+    private int videoBitRate = 1500;//kb/s jason-->480kb
     private FpsEnum fps;//fps
     private ResolutionEnum resolution; //分辨率
+    private int avcIFrameInterval; //MediaFormat.KEY_I_FRAME_INTERVAL
 
-    private int sampleRate = 44100;//采样率：Hz
+
     /**
      * 声道数
      */
     private int numChannels = 2;
     private int audioBitRate = 64000;
+    private int audioSampleRate = 44100;//采样率：Hz
     private int channelConfig = AudioFormat.CHANNEL_IN_STEREO;//立体声道
     private int audioFormat = AudioFormat.ENCODING_PCM_16BIT;//pcm16位
 
-    private int cameraType = Camera.CameraInfo.CAMERA_FACING_FRONT;
-//    private int cameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
 
-    private EncodeEnum endcoderType = EncodeEnum.HARD;
-    private DirectionEnum direction;
+    //sender
+    private int senderQueueLength;
 
 
     /**
@@ -56,11 +61,11 @@ public class PushConfig {
     public PushConfig() {
     }
 
-    public PushConfig(int width, int height, int bitRate, int sampleRate, int channelConfig, int audioFormat, int numChannels) {
+    public PushConfig(int width, int height, int videoBitRate, int audioSampleRate, int channelConfig, int audioFormat, int numChannels) {
         this.width = width;
         this.height = height;
-        this.bitRate = bitRate;
-        this.sampleRate = sampleRate;
+        this.videoBitRate = videoBitRate;
+        this.audioSampleRate = audioSampleRate;
         this.channelConfig = channelConfig;
         this.audioFormat = audioFormat;
         this.numChannels = numChannels;
@@ -74,11 +79,12 @@ public class PushConfig {
         config.setPreviewWidth(640);
         config.setPreviewHeight(380);
         config.setResolution(ResolutionEnum.RESOLUTION_480P);
-        config.setBitRate(1500);
+        config.setVideoBitRate(1500);
         config.setFps(FpsEnum.FPS_25);
-        config.setSampleRate(44100);
+        config.setAudioSampleRate(44100);
         config.setAudioBitRate(64000);
         config.setDirection(DirectionEnum.ORIENTATION_PORTRAIT);
+        config.setAvcIFrameInterval(2);
 //        config.setDirection(DirectionEnum.ORIENTATION_LANDSCAPE_HOME_RIGHT);
 //        config.setDirection(DirectionEnum.ORIENTATION_LANDSCAPE_HOME_LEFT);
 
@@ -111,12 +117,12 @@ public class PushConfig {
         this.height = height;
     }
 
-    public int getBitRate() {
-        return bitRate;
+    public int getVideoBitRate() {
+        return videoBitRate;
     }
 
-    public void setBitRate(int bitRate) {
-        this.bitRate = bitRate;
+    public void setVideoBitRate(int videoBitRate) {
+        this.videoBitRate = videoBitRate;
     }
 
     public FpsEnum getFps() {
@@ -127,12 +133,12 @@ public class PushConfig {
         this.fps = fps;
     }
 
-    public int getSampleRate() {
-        return sampleRate;
+    public int getAudioSampleRate() {
+        return audioSampleRate;
     }
 
-    public void setSampleRate(int sampleRate) {
-        this.sampleRate = sampleRate;
+    public void setAudioSampleRate(int audioSampleRate) {
+        this.audioSampleRate = audioSampleRate;
     }
 
     public int getNumChannels() {
@@ -232,6 +238,22 @@ public class PushConfig {
         this.direction = direction;
     }
 
+    public int getAvcIFrameInterval() {
+        return avcIFrameInterval;
+    }
+
+    public void setAvcIFrameInterval(int avcIFrameInterval) {
+        this.avcIFrameInterval = avcIFrameInterval;
+    }
+
+    public int getSenderQueueLength() {
+        return senderQueueLength;
+    }
+
+    public void setSenderQueueLength(int senderQueueLength) {
+        this.senderQueueLength = senderQueueLength;
+    }
+
     @Override
     public String toString() {
         return "PushConfig{" +
@@ -240,10 +262,10 @@ public class PushConfig {
                 ", height=" + height +
                 ", previewWidth=" + previewWidth +
                 ", previewHeight=" + previewHeight +
-                ", bitRate=" + bitRate +
+                ", videoBitRate=" + videoBitRate +
                 ", fps=" + fps +
                 ", resolution=" + resolution +
-                ", sampleRate=" + sampleRate +
+                ", audioSampleRate=" + audioSampleRate +
                 ", numChannels=" + numChannels +
                 ", audioBitRate=" + audioBitRate +
                 ", channelConfig=" + channelConfig +

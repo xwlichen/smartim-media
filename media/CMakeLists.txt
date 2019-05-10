@@ -90,7 +90,7 @@ add_library(
 set_target_properties(
         avcodec
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libavcodec-56.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavcodec-56.so)
 
 
 # 设备信息
@@ -101,7 +101,7 @@ add_library(
 set_target_properties(
         avdevice
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libavdevice-56.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavdevice-56.so)
 
 
 # 滤镜特效处理库
@@ -112,7 +112,7 @@ add_library(
 set_target_properties(
         avfilter
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libavfilter-5.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavfilter-5.so)
 
 # 封装格式处理库
 add_library(
@@ -122,7 +122,7 @@ add_library(
 set_target_properties(
         avformat
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libavformat-56.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavformat-56.so)
 
 # 工具库(大部分库都需要这个库的支持)
 add_library(
@@ -132,7 +132,7 @@ add_library(
 set_target_properties(
         avutil
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libavutil-54.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libavutil-54.so)
 
 
 # 后期处理
@@ -143,7 +143,7 @@ add_library(
 set_target_properties(
         postproc
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libpostproc-53.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libpostproc-53.so)
 
 
 # 音频采样数据格式转换库
@@ -154,7 +154,7 @@ add_library(
 set_target_properties(
         swresample
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libswresample-1.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libswresample-1.so)
 
 # 视频像素数据格式转换
 add_library(
@@ -164,7 +164,7 @@ add_library(
 set_target_properties(
         swscale
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libswscale-3.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libswscale-3.so)
 
 
 # x264格式编码
@@ -175,7 +175,7 @@ add_library(
 set_target_properties(
         x264
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libx264.a)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libx264.a)
 
 # yuv格式
 add_library(
@@ -185,7 +185,7 @@ add_library(
 set_target_properties(
         yuv
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libyuv.a)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libyuv.a)
 
 
 # fdk-acc格式
@@ -196,7 +196,7 @@ add_library(
 set_target_properties(
         fdk-aac
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libfdk-aac.a)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libfdk-aac.a)
 
 
 # rtmp格式
@@ -207,7 +207,7 @@ set_target_properties(
 #set_target_properties(
 #        rtmp
 #        PROPERTIES IMPORTED_LOCATION
-#        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/librtmp.a)
+#        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/librtmp.a)
 
 # crypto
 add_library(
@@ -217,7 +217,7 @@ add_library(
 set_target_properties(
         crypto
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libcrypto.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libcrypto.so)
 
 # ssl
 add_library(
@@ -227,7 +227,7 @@ add_library(
 set_target_properties(
         ssl
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi/libssl.so)
+        ${CMAKE_SOURCE_DIR}/src/main/jniLibs/armeabi-v7a/libssl.so)
 
 
 find_library( # Sets the name of the path variable.

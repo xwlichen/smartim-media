@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.smart.im.media.bean.PushConfig;
 import com.smart.im.media.bridge.LiveBridge;
-import com.smart.im.media.inter.AudioDataListener;
+import com.smart.im.media.listeners.AudioDataListener;
 import com.smart.im.media.manager.AudioRecordManager;
 
 /**

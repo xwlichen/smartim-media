@@ -34,11 +34,11 @@ public class SmartLivePusher implements ILivePusher {
         this.config = config;
         this.context = context;
 
-//        liveBridge = new LiveBridge();
+        liveBridge = new LiveBridge();
         videoPusher = new VideoPusher(liveBridge);
         audioPusher = new AudioPusher(liveBridge);
 
-//        liveBridge.initLivePushConfig(config);
+        liveBridge.initLivePushConfig(config);
         videoPusher.init(context, config);
         audioPusher.init(context, config);
     }

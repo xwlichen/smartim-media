@@ -25,7 +25,7 @@ public enum FpsEnum {
         this.fps = fps;
     }
 
-    public int getValue() {
+    public int value() {
         return fps;
     }
 }

@@ -13,6 +13,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.view.Surface;
 
 import com.blankj.utilcode.util.LogUtils;
 import com.smart.im.media.bean.FrameRateMeter;
@@ -24,6 +25,9 @@ import com.smart.im.media.bean.Size;
 import com.smart.im.media.encoder.MediaVideoEncoder;
 import com.smart.im.media.enums.DirectionEnum;
 import com.smart.im.media.filter.BaseHardVideoFilter;
+import com.smart.im.media.listeners.VideoDataListener;
+import com.smart.im.media.threads.VideoSenderThread;
+import com.smart.im.media.utils.MediaCodecHelper;
 import com.smart.im.media.utils.opengl.GLHelper;
 import com.smart.im.media.utils.opengl.VertexArray;
 
@@ -94,7 +98,7 @@ public class LiveHardVideoCore implements LiveVideoCore {
             LogUtils.e("LiveHardVideoCore's pushConfig is null");
             return false;
         }
-        loopingInterval = 1000 / pushConfig.getFps().getValue();
+        loopingInterval = 1000 / pushConfig.getFps().value();
 
         dstVideoFormat = new MediaFormat();
         videoGLHandlerThread = new HandlerThread("GLThread");
@@ -213,6 +217,10 @@ public class LiveHardVideoCore implements LiveVideoCore {
         private int currCamera;
 
 
+        //sender
+        private VideoSenderThread videoSenderThread;
+
+
 
 
         public VideoGLHandler(Looper looper) {
@@ -282,14 +290,30 @@ public class LiveHardVideoCore implements LiveVideoCore {
                     if (hasNewFrame) {
                         //共享texture
                         drawFrameBuffer();
-//                        drawMediaCodec(time * 1000000);
+                        drawMediaCodec(time * 1000000);
                         //共享drawFrameBuffer的滤镜后的数据
                         drawScreen();
-//                        encoderMp4(frameBufferTexture);//编码MP4
+                        encoderMp4(frameBufferTexture);//编码MP4
                         drawFrameRateMeter.count();
                         hasNewFrame = false;
                     }
                     break;
+
+
+                case WHAT_START_STREAMING: {
+                    if (dstVideoEncoder == null) {
+                        dstVideoEncoder = MediaCodecHelper.createHardVideoMediaCodec(pushConfig, dstVideoFormat);
+                        if (dstVideoEncoder == null) {
+                            throw new RuntimeException("create Video MediaCodec failed");
+                        }
+                    }
+                    dstVideoEncoder.configure(dstVideoFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+                    initMediaCodecGL(dstVideoEncoder.createInputSurface());
+                    dstVideoEncoder.start();
+                    videoSenderThread = new VideoSenderThread("VideoSenderThread", dstVideoEncoder, (VideoDataListener) msg.obj);
+                    videoSenderThread.start();
+                }
+                break;
                 default:
                     break;
             }
@@ -358,6 +382,22 @@ public class LiveHardVideoCore implements LiveVideoCore {
             }
         }
 
+
+        private void initMediaCodecGL(Surface mediacodecSurface) {
+            if (mediaCodecGLWapper == null) {
+                mediaCodecGLWapper = new MediaCodecGLWapper();
+                GLHelper.initMediaCodecGL(mediaCodecGLWapper, offScreenGLWapper.eglContext, mediacodecSurface);
+                GLHelper.makeCurrent(mediaCodecGLWapper);
+                GLES20.glEnable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
+                mediaCodecGLWapper.drawProgram = GLHelper.createMediaCodecProgram();
+                GLES20.glUseProgram(mediaCodecGLWapper.drawProgram);
+                mediaCodecGLWapper.drawTextureLoc = GLES20.glGetUniformLocation(mediaCodecGLWapper.drawProgram, "uTexture");
+                mediaCodecGLWapper.drawPostionLoc = GLES20.glGetAttribLocation(mediaCodecGLWapper.drawProgram, "aPosition");
+                mediaCodecGLWapper.drawTextureCoordLoc = GLES20.glGetAttribLocation(mediaCodecGLWapper.drawProgram, "aTextureCoord");
+            } else {
+                throw new IllegalStateException("initMediaCodecGL without uninitMediaCodecGL");
+            }
+        }
 
         /**
          * 更新预览界面的尺寸

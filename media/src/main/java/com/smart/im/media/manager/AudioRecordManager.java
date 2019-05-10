@@ -4,7 +4,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
-import com.smart.im.media.inter.AudioDataListener;
+import com.smart.im.media.listeners.AudioDataListener;
 
 import java.util.Arrays;
 
